@@ -5,7 +5,8 @@ Installation
 ------------
 Note: This project is extensively tested on a WAMP environment. Therefore a simillar environment is recommended.
 1. Simply copy all the files into a root directory (i.e. a directory with only the files in this repo)
-2. Request "Start.html" from the server.
+2. User's media files (i.e. mp3, mp4, webm, txt etc.) can be copied to their respective directories located inside the "User" directory (this is optional).
+3. Request "Start.html" from the server.
 
 Purpose
 -------
