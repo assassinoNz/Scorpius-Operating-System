@@ -1,0 +1,160 @@
+* {
+    /* border: thin solid red !important; */
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    font-family: 'Segoe UI Light';
+    font-size: 14px;
+    color: var(--defaultColor);
+    cursor: default;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+.body {
+    height: 100%;
+    width: 100%;
+
+    background-color: black;
+}
+
+.headerArea {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    height: 60px;
+    width: 100%;
+    padding: 10px;
+
+    background-color: var(--headerAreaBackgroundColor);
+    border: var(--headerAreaBorder);
+    border-width: var(--headerAreaBorderWidth);
+}
+
+.headerArea > h1 {
+    font-size: 25px;
+}
+
+.panelArea {
+    height: 100%;
+    width: 100%;
+    padding: 60px 10px 60px 10px;
+
+    background-color: var(--panelAreaBackgroundColor);
+    border: var(--panelAreaBorder);
+    border-width: var(--panelAreaBorderWidth);
+
+    z-index: 1;
+}
+
+.panelAreaDivision {
+    height: 100%;
+    width: 100%;
+}
+
+.controlsArea {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    height: 60px;
+    width: 100%;
+    padding: 10px;
+
+    background-color: var(--controlsAreaBackgroundColor);
+    border: var(--controlsAreaBorder);
+    border-width: var(--controlsAreaBorderWidth);
+
+    z-index: 2;
+}
+
+.label {
+    font-family: "calibri";
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.definition {
+    text-overflow: ellipsis;
+}
+
+.output {
+    text-overflow: ellipsis;
+    color: var(--outputColor);
+}
+
+.information {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.infoDisplayLarge {
+    font-size: 50px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.infoDisplayMedium {
+    font-size: 25px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.button {
+    margin: 0 10px 0 0;
+    height: 24px;
+    width: auto;
+    padding: 0 5px 0 5px;
+
+    background-color: var(--buttonBackgroundColor);
+    border: var(--buttonBorder);
+    border-width: var(--buttonBorderWidth);
+}
+
+.button:hover {
+    background-color: var(--buttonBackgroundColor_hover);
+}
+
+.linkButton {
+    margin: 0 5px 0 5px;
+
+    text-decoration: underline;
+}
+
+.linkButton:hover {
+    color: var(--linkButtonColor_hover);
+}
+
+.textInput {
+    margin: 20px 0 0 0;
+    height: 24px;
+    width: 100%;
+
+    background-color: var(--textInputBackgroundColor);
+    border: var(--textInputBorder);
+    border-width: var(--textInputBorderWidth);
+
+    cursor: text;
+
+    -ms-user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+}

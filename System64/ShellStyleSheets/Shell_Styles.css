@@ -1,0 +1,375 @@
+* {
+    /* border : thin solid red !important; */
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    font-family: 'Segoe UI Light';
+    font-size: 14px;
+    color: var(--defaultColor);
+    cursor: default;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+@keyframes createWindowAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(0.8, 0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes closeWindowAnimation {
+    0% {
+        opacity: 1;
+        transform: none;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.8, 0.8);
+    }
+}
+
+.body {
+    height: 100%;
+    width: 100%;
+
+    background-image: var(--workspaceAreaBackgroundImage);
+    background-size: cover;
+}
+
+.taskArea {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 30px;
+    width: 100%;
+    padding: 0 10px 0 10px;
+    overflow: visible;
+
+    background-color: var(--taskAreaBackgroundColor);
+    border: var(--taskAreaBorder);
+    border-width: var(--taskAreaBorderWidth);
+
+    z-index: 100;
+
+    transition: transform 0.5s;
+}
+
+.windowStackArea {
+    align-self: flex-start;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: auto;
+    min-height: 45px;
+    width: auto;
+    min-width: 500px;
+    padding: 0 5px 0 5px;
+
+    background-color: var(--windowStackAreaBackgroundColor);
+    border: var(--windowStackAreaBorder);
+    border-width: var(--windowStackAreaBorderWidth);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+
+    transition: background-color 0.3s;
+}
+
+.windowStackArea:hover {
+    background-color: var(--windowStackAreaBackgroundColor_hover);
+}
+
+.windowStackArea > span {
+    margin: 0 5px 0 5px;
+}
+
+.windowStackArea > span:hover {
+    color: var(--windowStackAreaColor_hoverChild);
+}
+
+.alertBox {
+    height: auto;
+    width: 100%;
+}
+
+.workspaceArea {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+
+    height: 100%;
+    width: 100%;
+    padding: 50px 5px 50px 5px;
+
+    background-size: 100%;
+    background-repeat: no-repeat;
+
+    z-index: 1;
+
+    transition: transform 0.5s;
+}
+
+.workspaceAreaDivision {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+
+    height: 100%;
+    width: 80%;
+}
+
+.workspaceAreaDivisionIcon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    margin: 5px;
+    height: 150px;
+    width: 150px;
+    padding: 10px;
+
+    text-align: center;
+
+    background-color: var(--workspaceIconBackgroundColor);
+    border: var(--workspaceIconBorder);
+    border-width: var(--workspaceIconBorderWidth);
+
+    transition: transform 0.5s;
+}
+
+.workspaceAreaDivisionIcon:hover {
+    transform: scale(1.2);
+    
+    background-color: var(--workspaceIconBackgroundColor_hover);
+}
+
+.workspaceAreaDivisionIconThumbnail {
+    margin: 0 0 10px 0;
+    height: 60%;
+    width: 100%;
+
+    font-size: 100px;
+
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.workspaceAreaDivisionIcon > span {
+    color: var(--workspaceAreaIconColor);
+    font-weight: 900;
+}
+
+.statusArea {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 30px;
+    width: 100%;
+    padding: 0 10px 0 10px;
+    overflow: visible;
+
+    background-color: var(--statusAreaBackgroundColor);
+    border: var(--statusAreaBorder);
+    border-width: var(--statusAreaBorderWidth);
+
+    z-index: 100;
+
+    transition: transform 0.5s;
+}
+
+.quickAccessArea {
+    align-self: flex-end;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 45px;
+    width: auto;
+    min-width: 500px;
+}
+
+.startButton {
+    position: absolute;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 90px;
+    width: 90px;
+
+    background-color: var(--startButtonBackgroundColor);
+    border: var(--startButtonBorder);
+    border-width: var(--startButtonBorderWidth);
+    border-radius: 100%;
+
+    transition: background-color 0.3s;
+}
+
+.startButton:hover {
+    background-color: var(--startButtonBackgroundColor_hover);
+}
+
+.quickAccessBar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    height: 100%;
+    width: 50%;
+
+    background-color: var(--quickAccessBarBackgroundColor);
+    border: var(--quickAccessBarBorder);
+    border-width: var(--quickAccessBarBorderWidth);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    
+    transition: background-color 0.3s;
+}
+
+.quickAccessBar:hover {
+    background-color: var(--quickAccessBarBackgroundColor_hover);
+}
+
+.quickAccessBar > input {
+    height: 100%;
+    width: 100%;
+    padding: 0 10px 0 10px;
+
+    color: var(--synchronizableInputPrimaryColor);
+
+    background-color: var(--synchronizableInputPrimaryBackgroundColor);
+    border: var(--synchronizableInputPrimaryBorder);
+    border-width: var(--synchronizableInputPrimaryBorderWidth);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+
+    cursor: auto;
+
+    -ms-user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+}
+
+.quickAccessBar > span {
+    margin-right: 10px;
+}
+
+.quickAccessBar > span:hover {
+    color: var(--quickAccessBarColor_hoverChild);
+}
+
+.window {
+    position: absolute;
+    top: 110px;
+    left: 58px;
+
+    height: auto;
+    width: auto;
+    padding: 10px 0 10px 0;
+
+    background-color: var(--windowBackgroundColor);
+    border: var(--windowBorder);
+    border-width: var(--windowBorderWidth);
+
+    box-shadow: 0 0 50px var(--windowBoxShadowColor);
+
+    transition: scale(0, 0);
+
+    animation-name: createWindowAnimation;
+    animation-duration: 0.3s;
+}
+
+.window-active {
+    background-color: var(--windowBackgroundColor_active);
+    box-shadow: 0 0 50px var(--windowBoxShadowColor_active);
+}
+
+.window-blurred {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.window-blurred > iframe {
+    opacity: 0;
+}
+
+.iFrame {
+    height: 500px;
+    width: 1250px;
+
+    background-color: var(--iFrameBackgroundColor);
+    border: var(--iFrameBorder);
+    border-width: var(--iFrameBorderWidth);
+
+    transition: height 0.5s, width 0.5s;
+}
+
+.iFrame-disabled {
+    pointer-events: none;
+}
+
+.componentIFrame {
+    height: 300px;
+    width: 300px;
+
+    border: none;
+}
+
+.screenSaverObject {
+    position: absolute;
+    top: 100px;
+    left: 300px;
+
+    height: 150px;
+    width: 150px;
+
+    background-image: url("../ImageRes/ScreenSaver_Object.gif");
+    background-size: 150% 150%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    transform: scaleX(-1);
+}
+
+.label {
+    font-family: "calibri";
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 16px;
+    text-overflow: ellipsis;
+}
+
+.linkButton {
+    margin: 0 5px 0 5px;
+
+    text-decoration: underline;
+}

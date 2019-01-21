@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Analog Clock</title>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            /* border: thin solid red !important; */
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+            font-family: 'Segoe UI Light';
+            font-size: 14px;
+            color: var(--defaultColor);
+            cursor: default;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+
+        .body {
+            display: grid;
+            grid-template-areas:
+                "panel"
+            ;
+
+            height: 100%;
+            width: 100%;
+
+            background-color: transparent;
+        }
+
+        .clockFrame {
+            position: relative;
+
+            grid-area: panel;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100%;
+            width: 100%;
+
+            border: solid rgba(255, 255, 255, 1);
+            border-radius: 100%;
+        }
+
+        .clockHand {
+            position: absolute;
+
+            width: 2px;
+
+            background-image: linear-gradient(white 0%, white 50%, transparent 50%);
+        }
+    </style>
+
+    <script>
+        function animateAnalogClock() {
+            var secondHand = document.getElementById("secondHand");
+            var minuteHand = document.getElementById("minuteHand");
+            var hourHand = document.getElementById("hourHand");
+
+            window.setInterval(repeat, 1000);
+
+            function repeat() {
+                var d = new Date;
+
+                var seconds = d.getSeconds();
+                var minuteSeconds = d.getMinutes() * 60 + seconds;
+                var hourSeconds = (d.getHours() - 12) * 3600 + minuteSeconds;
+
+                var secondHandAngle = 6 * seconds;
+                var secondHandAngleDegree = "rotate(" + secondHandAngle + "deg)";
+
+                var minuteHandAngle = minuteSeconds / 10;
+                var minuteHandAngleDegree = "rotate(" + minuteHandAngle + "deg)";
+
+                var hourHandAngle = hourSeconds / 120;
+                var hourHandAngleDegree = "rotate(" + hourHandAngle + "deg)";
+
+                secondHand.style.transform = secondHandAngleDegree;
+                minuteHand.style.transform = minuteHandAngleDegree;
+                hourHand.style.transform = hourHandAngleDegree;
+            }
+        }
+    </script>
+</head>
+
+<body class="body" onload="animateAnalogClock();">
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="clockPanel" class="clockFrame">
+            <div id="secondHand" class="clockHand" style="height: 90%;"></div>
+            <div id="minuteHand" class="clockHand" style="height: 70%;"></div>
+            <div id="hourHand" class="clockHand" style="height: 50%;"></div>
+        </div>
+    </div>
+</body>
+
+</html>

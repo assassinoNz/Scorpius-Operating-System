@@ -1,0 +1,35 @@
+:root {
+--defaultColor: rgba(255, 255, 255, 1);
+--sidebarAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+--sidebarDivisionBackgroundColor: ;
+--sidebarDivisionBackgroundColor_active: rgba(100, 100, 100, 0.8);
+--sidebarDivisionBackgroundColor_hover: rgba(100, 100, 100, 0.8);
+--paneAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+--paneDivisionBackgroundColor: rgba(100, 100, 100, 0.8);
+--paneSectorColor-activeChild: rgba(0, 0, 0, 1);
+--paneSectorBorder-activeChild: solid rgba(0, 0, 0, 1);
+--paneSectorBorderWidth-activeChild: 0 10px 0 0;
+--paneSectorColor_hoverChild: yellowgreen;
+--panelAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+--panelDivisionBackgroundColor: rgba(40, 40, 40, 1);
+--panelSectorColor_hoverChild: rgba(255, 255, 255, 1);
+--panelSectorBorder_hoverChild: solid rgba(255, 255, 255, 1);
+--panelSectorBorderWidth_hoverChild: 0 0 0 10px;
+--panelSectorColor_activeChild: yellowgreen;
+--panelSectorBorder_activeChild: solid yellowgreen;
+--panelSectorBorderWidth_activeChild: 0 0 0 10px;
+--infoAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+--infoDivisionBackgroundColor: rgba(40, 40, 40, 1);
+--controlsAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+--controlsDivisionBackgroundColor: ;
+--controlsDivisionBackgroundColor_hover: rgba(100, 100, 100, 0.8);
+--outputColor: yellowgreen;
+--buttonBackgroundColor: ;
+--buttonBackgroundColor_hover: rgba(40, 40, 40, 1);
+--buttonBorder: solid rgba(255, 255, 255, 1);
+--buttonBorderWidth: thin;
+--linkButtonColor_hover: rgba(40, 40, 40, 1);
+--textInputBackgroundColor: ;
+--textInputBorder: solid rgba(255, 255, 255, 1);
+--textInputBorderWidth: 0 0 thin 0;
+}
