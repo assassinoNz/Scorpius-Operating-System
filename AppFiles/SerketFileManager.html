@@ -45,8 +45,6 @@
             var directoryString = document.getElementById("navigationStringInput").value;
             //Check if the directoryString starts with "User/"
             if (directoryString.startsWith("User/")) {
-                window.alert("Scanning non-user locations are restricted");
-            } else {
                 //Make sure the directoryString ends with "/"
                 if (directoryString.endsWith("/")) {
                     presentWorkingDirectory = directoryString;
@@ -55,6 +53,8 @@
                 }
                 //Now scan the presentWorkingDirectory
                 scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            } else {
+                window.alert("Scanning non-user locations are restricted");
             }
         }
 
