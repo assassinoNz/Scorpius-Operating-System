@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height: 100%; width: 100%; overflow: hidden;">
+
+<head>
+    <title id="title">Start</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="System64/ShellStyleSheets/Shell_StyleVariables.css">
+    <link rel="stylesheet" href="System64/ShellStyleSHeets/Shell_Styles.css">
+
+    <script src="System64/ShellScripts/Shell_FunctionsLibrary.js"></script>
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+</head>
+
+<body id="body" class="body" onload="initialize();">
+    <!-- taskArea -->
+    <div id="taskArea" class="taskArea">
+        <div id="windowStackArea" class="windowStackArea">
+            <span>| Start |</span>
+        </div>
+    </div>
+    <!-- workspaceArea -->
+    <div id="workspaceArea" class="workspaceArea">
+
+    </div>
+    <!-- statusArea -->
+    <div id="statusArea" class="statusArea">
+        <div id="quickAccessArea" class="quickAccessArea">
+            <div class="quickAccessBar">
+
+            </div>
+            <div class="startButton" onclick="lockScreen();">
+                <span>Lock</span>
+            </div>
+            <div class="quickAccessBar">
+                <span onclick="onOffScreenSaver();">Screen Saver</span>
+                <span onclick="refreshWindow();">Refresh</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- quickAccessArea for startScreen -->
+    <div id="quickAccessAreaStart" class="quickAccessArea" style="display: none;">
+        <div class="quickAccessBar">
+
+        </div>
+        <div class="startButton" onclick="lockScreen();">
+            <span>Lock</span>
+        </div>
+        <div class="quickAccessBar">
+            <span onclick="onOffScreenSaver();">Screen Saver</span>
+            <span onclick="refreshWindow();">Refresh</span>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Settings</title>
+    <meta charset="UTF-8">
+
+    <base href="../">
+
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_Styles.css">
+
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        .body {
+            grid-template-areas:
+                "sidebar pane pane pane pane pane panel panel panel info info info info info info info info info info controls"
+            ;
+        }
+
+        .panelAreaDivision {
+            overflow: hidden;
+        }
+
+        .panelAreaDivision:hover {
+            overflow: auto;
+        }
+
+        .panelAreaDivisionSector {
+            text-align: center;
+
+            width: 100%;
+        }
+
+        .infoAreaDivisionSector:hover > h1, .infoAreaDivisionSector:hover > p, .infoAreaDivisionSector:hover > input {
+            padding-left: 10px;
+
+            color: var(--panelSectorColor_hoverChild);
+
+            border: var(--panelSectorBorder_hoverChild);
+            border-width: var(--panelSectorBorderWidth_hoverChild);
+        }
+        
+        .infoAreaDivisionSector-active > h1, .infoAreaDivisionSector-active > p, .infoAreaDivisionSector-active > input {
+            padding-left: 10px;
+
+            color: var(--panelSectorColor_activeChild) !important;
+
+            border: var(--panelSectorBorder_activeChild);
+            border-width: var(--panelSectorBorderWidth_activeChild);
+        }
+
+        .textInput {
+            text-align: left;
+
+            border: none;
+        }
+    </style>
+
+    <script>
+        //Declare and initialize variables
+        let selectedInfoSector = null;
+        let selectedPanelSector = null;
+        let selectedThemeCategory = null;
+        let themeDataObject = {};
+
+        function populatePanels(themeCategory, outputPanel) {
+            //Populate categoryPanel
+            for (let themeName in themeDataObject[themeCategory]) {
+                //panelSector creation
+                const panelSector = document.createElement("div");
+                panelSector.id = themeDataObject[themeCategory][themeName][0];
+                panelSector.dataset.themeCategory = themeCategory;
+                panelSector.classList.add("panelAreaDivisionSector");
+                panelSector.classList.add("panelAreaDivisionSector-thumbnail");
+                panelSector.addEventListener("click", function () {
+                    //Make sectors for each variable inside the infoArea
+                    scanSettingsFile(this.id, document.getElementById("stylePersonalizationDivision"));
+                    selectPanelSector(this);
+                });
+                //Thumbnail creation
+                const thumbnail = document.createElement("div");
+                thumbnail.setAttribute("class", "thumbnail");
+                thumbnail.style.backgroundImage = `url("${themeDataObject[themeCategory][themeName][1].replace("<CODE>", "W")}")`;
+                //panelSectorTitle creation
+                const panelSectorTitle = document.createElement("h1");
+                panelSectorTitle.setAttribute("class", "title");
+                panelSectorTitle.innerHTML = themeName;
+                //panelSectorInfo creation
+                const panelSectorInfo = document.createElement("p");
+                panelSectorInfo.setAttribute("class", "information");
+                panelSectorInfo.innerHTML = themeDataObject[themeCategory][themeName][2];
+                //Append elements to HTML
+                panelSector.appendChild(thumbnail);
+                panelSector.appendChild(panelSectorTitle);
+                panelSector.appendChild(panelSectorInfo);
+                outputPanel.appendChild(panelSector);
+            }
+        }
+
+        function scanSettingsFile(settingsFilePath, outputPanel) {
+            //Clear outputPanel
+            outputPanel.innerHTML = "";
+            //Create sectors for variables
+            parseHttpDataRequest(settingsFilePath, undefined, "json", function (styleVariablesObject) {
+                //Create a infoSector for each CSS styleVariable if there are any
+                for (let styleVariable in styleVariablesObject) {
+                    //panelSector creation
+                    const infoSector = document.createElement("div");
+                    infoSector.id = styleVariable;
+                    //Add stringifiedDataArray for the relevant key inside the panelSector's "data-array" attribute
+                    infoSector.dataset.dataArray = JSON.stringify(styleVariablesObject[styleVariable]);
+                    infoSector.setAttribute("class", "infoAreaDivisionSector");
+                    //Add eventListener for start editing variable
+                    infoSector.addEventListener("click", function () { selectInfoSector(this); });
+                    //panelSectorTitle creation
+                    const infoSectorTitle = document.createElement("h1");
+                    infoSectorTitle.setAttribute("class", "title");
+                    infoSectorTitle.innerHTML = styleVariablesObject[styleVariable][0];
+                    //panelSectorEventType creation
+                    const infoSectorEventType = document.createElement("p");
+                    infoSectorEventType.setAttribute("class", "information");
+                    infoSectorEventType.innerHTML = styleVariablesObject[styleVariable][1];
+                    //panelSectorEventType creation
+                    const infoSectorVariableValueInput = document.createElement("input");
+                    infoSectorVariableValueInput.setAttribute("class", "textInput");
+                    infoSectorVariableValueInput.type = "text";
+                    infoSectorVariableValueInput.value = styleVariablesObject[styleVariable][2];
+                    //Append elements into HTML
+                    infoSector.appendChild(infoSectorTitle);
+                    infoSector.appendChild(infoSectorEventType);
+                    infoSector.appendChild(infoSectorVariableValueInput);
+                    outputPanel.appendChild(infoSector);
+                }
+            });
+        }
+
+        function selectPanelSector(sectorToSelect) {
+            //Check if any sector is selected
+            if (selectedPanelSector !== null) {
+                //Deselect selectedSector
+                selectedPanelSector.classList.remove("panelAreaDivisionSector-active");
+                selectedPanelSector.children[0].style.filter = "";
+                selectedThemeCategory = null;
+            }
+            //Check if there is any sectorToSelect
+            if (sectorToSelect !== null) {
+                //Select sectorToSelect
+                sectorToSelect.classList.add("panelAreaDivisionSector-active");
+                sectorToSelect.children[0].style.filter = "invert(50%)";
+            }
+            //Update selectedSector
+            selectedPanelSector = sectorToSelect;
+            selectedThemeCategory = sectorToSelect.dataset.themeCategory;
+        }
+
+        function selectInfoSector(sectorToSelect) {
+            //Check if any sector is selected
+            if (selectedInfoSector !== null) {
+                //Deselect selectedSector
+                selectedInfoSector.classList.remove("infoAreaDivisionSector-active");
+                //Remove selectedSector's input id
+                selectedInfoSector.children[2].id = "";
+            }
+            //Check if there is any sectorToSelect
+            if (sectorToSelect !== null) {
+                //Select sectorToSelect
+                sectorToSelect.classList.add("infoAreaDivisionSector-active");
+                //Make the selectedSector's input into synchronizableInputSecondary
+                sectorToSelect.children[2].id = "synchronizableInputSecondary";
+            }
+            //Update selectedSector
+            selectedInfoSector = sectorToSelect;
+        }
+
+        function createStylesheetObject(panelDivision) {
+            //Get all panelAreaDivisionSectors
+            const panelSectorsArray = panelDivision.children;
+            //Compile each panelSector's data into the stylesheetObject
+            const stylesheetObject = {};
+            for (let i = 0; i < panelSectorsArray.length; i++) {
+                //Get the inputValue of the panelSector
+                const panelSectorVariableValueInput = panelSectorsArray[i].children[2].value;
+                //Retrieve the original dataArray stringified inside data-array attribute
+                stylesheetObject[panelSectorsArray[i].id] = JSON.parse(panelSectorsArray[i].dataset.dataArray);
+                //Replace its styleVariableValue with the new value
+                stylesheetObject[panelSectorsArray[i].id][2] = panelSectorVariableValueInput;
+            }
+            //Return the stylesheetObject
+            return stylesheetObject;
+        }
+
+        function createStylesheetContent(stylesheetObject) {
+            //Declare and initialize stylesheetContent
+            let stylesheetContent = ":root {\n";
+            //Convert stylesheetObject's key-value pairs into css variable-value pairs
+            for (let cssVariable in stylesheetObject) {
+                stylesheetContent = stylesheetContent + cssVariable + ": " + stylesheetObject[cssVariable][2] + ";\n";
+            }
+            //Add the last line of the stylesheetContent
+            stylesheetContent = stylesheetContent + "}";
+            //Return the stylesheetContent
+            return stylesheetContent;
+
+        }
+
+        function applySettings() {
+            if (selectedThemeCategory === null) {
+                window.alert("Please load a theme file before attempting application");
+            } else {
+                //Get stylesheetObject for the loaded theme
+                const stylesheetObject = createStylesheetObject(document.getElementById("stylePersonalizationDivision"));
+                if (selectedThemeCategory === "shellThemes") {
+                    //Update every cssVariable in the :root rule with the corresponding inputValue
+                    for (let cssVariable in stylesheetObject) {
+                        window.parent.document.styleSheets[0].cssRules[0].style.setProperty(cssVariable, stylesheetObject[cssVariable][2]);
+                    }
+                } else if (selectedThemeCategory === "serketAppPlatformThemes") {
+                    //Update every cssVariable in the :root rule with the corresponding inputValue
+                    for (let cssVariable in stylesheetObject) {
+                        document.styleSheets[0].cssRules[0].style.setProperty(cssVariable, stylesheetObject[cssVariable][2]);
+                    }
+                }
+            }
+        }
+
+        function saveSettings() {
+            if (selectedThemeCategory === null) {
+                window.alert("Please load a theme file before attempting save");
+            } else {
+                //Get stylesheetObject for the loaded theme
+                const stylesheetObject = createStylesheetObject(document.getElementById("stylePersonalizationDivision"));
+                //Get CSS content from the styleSheetObject
+                const stylesheetContent = createStylesheetContent(stylesheetObject);
+                if (selectedThemeCategory === "shellThemes") {
+                    //Save settings for the shell
+                    writeToFiles(stylesheetObject, stylesheetContent, "System64/ShellStyleSheets/Shell_StyleVariables");
+                } else if (selectedThemeCategory === "serketAppPlatformThemes") {
+                    //Save settings for the apps
+                    writeToFiles(stylesheetObject, stylesheetContent, "AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables");
+                }
+                applySettings();
+            }
+        }
+
+        function writeToFiles(stylesheetObject, stylesheetContent, commonFileName) {
+            //Save content to the .json file
+            //Objectify PHP parameters
+            const parametersObjectJSON = {
+                functionString: "saveTextToFile();",
+                filePath: commonFileName + ".json",
+                contentString: JSON.stringify(stylesheetObject)
+            };
+            //Send data to the server for saving
+            parseHttpTaskRequest('FileSystem.php', parametersObjectJSON, undefined);
+            //Save content to th .css file
+            //Objectify PHP parameters
+            const parametersObjectCSS = {
+                functionString: "saveTextToFile();",
+                filePath: commonFileName + ".css",
+                contentString: stylesheetContent
+            };
+            //Send data to the server for saving
+            parseHttpTaskRequest('FileSystem.php', parametersObjectCSS, undefined);
+        }
+
+        function initialize() {
+            //Request themeDataObject
+            parseHttpDataRequest("System64/Registry/ThemeLinks.json", undefined, "json", function (responseObject) {
+                themeDataObject = responseObject;
+                //Populate category panels
+                populatePanels("shellThemes", document.getElementById("shellThemesPanel"));
+                populatePanels("serketAppPlatformThemes", document.getElementById("appThemesPanel"));
+            });
+        }
+    </script>
+</head>
+
+<body id="body" class="body" onload="initialize();">
+    <!-- sidebarArea -->
+    <div id="sidebarArea" class="sidebarArea">
+        <div class="sidebarAreaDivision sidebarAreaDivision-active" onclick="switchPane('panelsPane', this);"><span
+                class="label">PANELS</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('homePane', this);"><span class="label">HOME</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('settingsPane', this);"><span class="label">SETTINGS</span></div>
+    </div>
+    <!-- paneArea -->
+    <div id="paneArea" class="paneArea">
+        <div id="panelsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector paneAreaDivisionSector-active" onclick="switchPanel('shellThemesPanel', this);">
+                <h1 class="title">Shell Themes Library</h1>
+                <p class="definition">Navigate through the pre-defined themes that make up the shell of Scorpius</p>
+            </div>
+            <div class="paneAreaDivisionSector" onclick="switchPanel('appThemesPanel', this);">
+                <h1 class="title">Serket App Themes Library</h1>
+                <p class="definition">Navigate through the pre-defined themes that make up the interface of all the
+                    apps based on the Serket App Platform</p>
+            </div>
+            <div class="paneAreaDivisionSector" onclick="switchPanel('iconThemesPanel', this);">
+                <h1 class="title">Icon Styles Library</h1>
+                <p class="definition">Navigate through the pre-defined icon styles for apps, file types etc.</p>
+            </div>
+        </div>
+
+        <div id="homePane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Apply Settings</h1>
+                <p class="definition">Apply and review the tweaks</p>
+                <button class="button" onclick=""><span class="label">APPLY</span></button>
+            </div>
+        </div>
+
+        <div id="settingsPane" class="paneAreaDivision">
+
+        </div>
+
+    </div>
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="shellThemesPanel" class="panelAreaDivision">
+
+        </div>
+        <div id="appThemesPanel" class="panelAreaDivision">
+
+        </div>
+        <div id="iconThemesPanel" class="panelAreaDivision">
+
+        </div>
+    </div>
+    <!-- infoArea -->
+    <div id="infoArea" class="infoArea">
+        <div id="stylePersonalizationDivision" class="infoAreaDivision"></div>
+        <input id="synchronizableInputSecondary" style="display: none;"/>
+    </div>
+    <!-- controlsArea -->
+    <div id="controlsArea" class="controlsArea">
+
+    </div>
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display: none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar">
+            <input id="synchronizableInputPrimary" type="text" placeholder="Enter variable value..." onkeyup="parseOuterScript('synchronizeInput');" />
+        </div>
+        <div class="startButton" onclick="parseInnerScript('applySettings');">
+            <span>Apply</span>
+        </div>
+        <div class="quickAccessBar">
+            <span onclick="parseInnerScript('saveSettings');">Save</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

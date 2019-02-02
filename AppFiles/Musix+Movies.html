@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Musix+Movies</title>
+    <meta charset="UTF-8">
+
+    <base href="../">
+
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_Styles.css">
+
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        :root {
+             /* Sidebar Area */
+            --sidebarDivisionBackgroundColor: rgba(40, 40, 40, 0.8);
+
+            --sidebarDivisionBackgroundColor_active: ;
+
+            --sidebarDivisionBackgroundColor_hover: ;
+
+            /* PaneArea */
+            --paneAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+            --paneDivisionBackgroundColor: ;
+
+            --paneSectorColor-activeChild: rgba(40, 40, 40, 1);
+            --paneSectorBorder-activeChild: solid rgba(40, 40, 40, 1);
+            --paneSectorBorderWidth-activeChild: 0 10px 0 0;
+
+            /* Panel Area */
+            --panelAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+            --panelDivisionBackgroundColor: ;
+
+            /* Info Area */
+            --infoAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+            --infoDivisionBackgroundColor: ;
+
+            /* Controls Area */
+            --controlsAreaBackgroundColor: rgba(100, 100, 100, 0.5);
+            --controlsDivisionBackgroundColor: rgba(40, 40, 40, 0.8);
+            --controlsDivisionBackgroundColor_hover: ;
+        }
+
+        .body {
+            background-color: rgba(70, 70, 70, 1);
+        }
+
+        .videoMode > .sidebarArea, .videoMode > .paneArea, .videoMode > .panelArea, .videoMode > .infoArea, .videoMode > .controlsArea {
+            opacity: 0;
+
+            transition: opacity 0.5s;
+        }
+
+        .videoMode > .subtitlesDisplayContainer {
+            display: flex;
+        }
+
+        .regularMode > .sidebarArea, .regularMode > .paneArea {
+            opacity: 1 !important;
+        }
+
+        .videoMode:hover > .sidebarArea, .videoMode:hover > .paneArea, .videoMode:hover > .panelArea, .videoMode:hover > .infoArea, .videoMode:hover > .controlsArea {
+            opacity: 1;
+        }
+
+        .videoMode:hover > .subtitlesDisplayContainer {
+            opacity: 0;
+        }
+
+        .sidebarArea, .paneArea, .panelArea, .infoArea, .controlsArea {
+            z-index: 2;
+        }
+
+        .panelAreaDivision {
+            position: relative;
+            overflow: hidden;
+            
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+        }
+
+        .panelAreaDivision:hover {
+            overflow: hidden;
+        }
+
+        .seekSliderContainer {
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+
+            height: 375px;
+            width: 375px;
+        }
+
+        .seekSliderThumbContainer {
+            position: absolute;
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+
+            height: 100%;
+            width: 100%;
+            overflow: visible;
+
+            border: 40px solid rgba(40, 40, 40, 0.8);
+            border-bottom-color: rgba(40, 40, 40, 1);
+            border-radius: 100%;
+
+            transform: rotate(0deg);
+        }
+
+        .seekSliderThumb {
+            position: relative;
+            bottom: -55px;
+
+            height: 70px;
+            width: 70px;
+
+            background-color: rgba(40, 40, 40, 1);
+            border-radius: 100%;
+        }
+
+        .subtitlesDisplayContainer {
+            grid-column-start: 7;
+            grid-column-end: 15;
+            grid-row-start: 1;
+            grid-row-end: 2;
+
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+
+            z-index: 1;
+        }
+
+        .subtitlesDisplay {
+            visibility: hidden;
+
+            padding: 5px;
+            height: auto;
+            width: auto;
+            margin: 0 0 10px 0;
+
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+        }
+
+        .subtitlesDisplay, .subtitlesDisplay > * {
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .volumeSliderContainer {
+            position: absolute;
+            right: 0;
+            bottom: 20px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            height: 100px;
+            width: 100px;
+        }
+
+        .volumeSliderThumbContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100%;
+            width: 100%;
+
+            transform: rotate(180deg);
+        }
+
+        .volumeSliderThumb {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100%;
+            width: 100%;
+
+            border: thick solid rgba(40, 40, 40, 0.8);
+            border-bottom-color: rgba(130, 130, 130, 1);
+            border-radius: 100%;
+        }
+
+        .mediaController {
+            grid-row-start: 1;
+            grid-row-end: -1;
+            grid-column-start: 1;
+            grid-column-end: -1;
+
+            height: 100%;
+            width: 100%;
+
+            object-fit: cover;
+
+            z-index: 0;
+        }
+
+        .mediaController-regular {
+            grid-column-start: 7;
+        }
+
+        .mediaController-preservedRatio {
+            object-fit: contain;
+        }
+    </style>
+
+    <script>
+        //Declare playListTrackPathsArrays
+        const previousTrackPathsArray = [];
+        const playingTrackPathsArray = [];
+        //Declare and initiate presentWorkingDirectory
+        let presentWorkingDirectory = "User/Audios/";
+        //Declare and initialize global variables
+        let extensionsDataObject = {};
+
+        function changeDirectory() {
+            //Get directoryPath from synchronizableInputSecondary
+            let directoryPath = document.getElementById("inputNavigateDirectory").value;
+            //Validate if the directoryPath's root is "User/"
+            if (directoryPath.startsWith("User/")) {
+                //Make sure that the directoryPath ends with "/"
+                if (directoryPath.endsWith("/")) {
+                    directoryPath = directoryPath + "/";
+                }
+                //Update presentWorkingDirectory
+                presentWorkingDirectory = directoryPath;
+                //Scan for files inside the directoryPath
+                scanDirectory(presentWorkingDirectory);
+                //Switch to libraryPane
+                switchPane('libraryPane', document.getElementById("sidebarArea").children[1]);
+            } else {
+                window.alert("Invalid location");
+            }
+        }
+
+        function searchDirectory() {
+            //Get the searchString
+            const searchString = document.getElementById("synchronizableInputSecondary").value;
+            //Create a directoryPath using the searchString
+            const directoryPath = presentWorkingDirectory + "*" + searchString;
+            //Search for the string inside the presentWorkingDirectory
+            scanDirectory(directoryPath);
+            //Switch to libraryPane
+            switchPane('libraryPane', document.getElementById("sidebarArea").children[1]);
+        }
+
+        function scanDirectory(directoryPath) {
+            //Get libraryPane
+            const libraryPane = document.getElementById("libraryPane");
+            //Clear libraryPane
+            libraryPane.innerHTML = "";
+            //Objectify PHP parameters
+            const parametersObject = {
+                functionString: "getFilePathsArray();",
+                directoryPath: directoryPath
+            };
+            //Request filePathsArray
+            parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (filePathsArray) {
+                //Create a paneSector for each file
+                if (filePathsArray.length !== 0) {
+                    for (let i = 0; i < filePathsArray.length; i++) {
+                        //Checks if fileExtension matches with the supportedFileExtensionsArray elements
+                        const fileExtension = filePathsArray[i].slice(filePathsArray[i].lastIndexOf(".")).toLowerCase();
+                        if (Object.keys(extensionsDataObject.audioExtensions).includes(fileExtension) || Object.keys(extensionsDataObject.movieExtensions).includes(fileExtension) || Object.keys(extensionsDataObject.containerExtensions).includes(fileExtension)) {
+                            //paneSector creation
+                            const paneSector = document.createElement("div");
+                            paneSector.id = filePathsArray[i];
+                            paneSector.setAttribute("class", "paneAreaDivisionSector");
+                            //paneSectorTitle creation
+                            const paneSectorTitle = document.createElement("h1");
+                            paneSectorTitle.setAttribute("class", "title");
+                            paneSectorTitle.innerHTML = filePathsArray[i].slice(filePathsArray[i].lastIndexOf("/") + 1).replace(fileExtension, "");
+                            //paneSectionType creation
+                            const paneSectorSize = document.createElement("p");
+                            paneSectorSize.setAttribute("class", "information");
+                            paneSectorSize.innerHTML = fileExtension;
+                            // paneSectorLink1 creation
+                            const paneSectorLink1 = document.createElement("span");
+                            paneSectorLink1.setAttribute("class", "linkButton");
+                            paneSectorLink1.innerHTML = "Add To Playlist";
+                            //Add eventListener for "Add To Playlist" functionality
+                            paneSectorLink1.addEventListener("click", function () {
+                                playingTrackPathsArray.push(this.parentElement.id);
+                                updatePlaylistPane();
+                            });
+                            //paneSectorLink2 creation
+                            const paneSectorLink2 = document.createElement("span");
+                            paneSectorLink2.setAttribute("class", "linkButton");
+                            paneSectorLink2.innerHTML = "Play Now";
+                            //Add eventListener for "Immediate Play" functionality
+                            paneSectorLink2.addEventListener("click", function () {
+                                playingTrackPathsArray.splice(0, 1, this.parentElement.id);
+                                loadTrack(playingTrackPathsArray[0]);
+                                continueTrack();
+                                updatePlaylistPane();
+                            });
+                            // paneSectorLink3 creation
+                            const paneSectorLink3 = document.createElement("span");
+                            paneSectorLink3.setAttribute("class", "linkButton");
+                            paneSectorLink3.innerHTML = "Play Next";
+                            //Add eventListener for "Play Next" functionality
+                            paneSectorLink3.addEventListener("click", function () {
+                                if (playingTrackPathsArray.length === 0) {
+                                    playingTrackPathsArray.unshift(this.parentElement.id);
+                                } else {
+                                    playingTrackPathsArray.splice(1, 0, this.parentElement.id);
+                                }
+                                updatePlaylistPane();
+                            });
+                            //Append elements into HTML
+                            paneSector.appendChild(paneSectorTitle);
+                            paneSector.appendChild(paneSectorSize);
+                            paneSector.appendChild(paneSectorLink1);
+                            paneSector.appendChild(paneSectorLink2);
+                            paneSector.appendChild(paneSectorLink3);
+                            libraryPane.appendChild(paneSector);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePlaylistPane() {
+            //Get playlistPane
+            const playlistPane = document.getElementById("playlistPane");
+            //Clear playListPane
+            playlistPane.innerHTML = "";
+            //Create a paneSector for each pastTrack
+            for (let i = 0; i < previousTrackPathsArray.length; i++) {
+                //Get fileExtension
+                const fileExtension = previousTrackPathsArray[i].slice(previousTrackPathsArray[i].lastIndexOf(".")).toLowerCase();
+                //paneSector creation
+                const paneSector = document.createElement("div");
+                paneSector.setAttribute("class", "paneAreaDivisionSector");
+                paneSector.id = previousTrackPathsArray[i];
+                //paneSectionTitleCreation
+                const paneSectorTitle = document.createElement("h1");
+                paneSectorTitle.setAttribute("class", "title");
+                paneSectorTitle.innerHTML = previousTrackPathsArray[i].slice(previousTrackPathsArray[i].lastIndexOf("/") + 1).replace(fileExtension, "");
+                //paneSectionType creation
+                const paneSectionType = document.createElement("p");
+                paneSectionType.setAttribute("class", "information");
+                paneSectionType.innerHTML = "Past";
+                // paneSectorLink1 creation
+                // var paneSectorLink1 = document.createElement("span");
+                // paneSectorLink1.setAttribute("class", "linkButton");
+                // paneSectorLink1.innerHTML = "Play Again";
+                // paneSectorLink1.addEventListener("click", function () {
+                //     playingTrackPathsArray.unshift(this.parentElement.id);
+                //     playMovieTrack();
+                // });
+                //Append elements into HTML
+                paneSector.appendChild(paneSectorTitle);
+                paneSector.appendChild(paneSectionType);
+                // paneSector.appendChild(paneSectorLink1);
+                playlistPane.appendChild(paneSector);
+            }
+            //Create a paneSector for each upcomingTrack
+            for (let i = 0; i < playingTrackPathsArray.length; i++) {
+                //Get fileExtension
+                const fileExtension = playingTrackPathsArray[i].slice(playingTrackPathsArray[i].lastIndexOf(".")).toLowerCase();
+                //paneSector creation
+                const paneSector = document.createElement("div");
+                paneSector.setAttribute("class", "paneAreaDivisionSector");
+                paneSector.id = playingTrackPathsArray[i];
+                //paneSectionTitleCreation
+                const paneSectorTitle = document.createElement("h1");
+                paneSectorTitle.setAttribute("class", "title");
+                paneSectorTitle.innerHTML = playingTrackPathsArray[i].slice(playingTrackPathsArray[i].lastIndexOf("/") + 1).replace(fileExtension, "");
+                //paneSectionType creation
+                const paneSectionType = document.createElement("p");
+                paneSectionType.setAttribute("class", "information");
+                //Add styling only for the first element (Because the first element is the currentPlayingTrack)
+                if (i === 0) {
+                    paneSector.classList.add("paneAreaDivisionSector-active");
+                    paneSectionType.innerHTML = "Now playing";
+                } else {
+                    paneSectionType.innerHTML = "Upcoming";
+                }
+                // paneSectorLink1 creation
+                // var paneSectorLink1 = document.createElement("span");
+                // paneSectorLink1.setAttribute("class", "linkButton");
+                // paneSectorLink1.innerHTML = "Remove";
+                // paneSectorLink1.addEventListener("click", function () {
+                //     playingTrackPathsArray.unshift(this.parentElement.id);
+                //     playMovieTrack();
+                // });
+                //Append elements into HTML
+                paneSector.appendChild(paneSectorTitle);
+                paneSector.appendChild(paneSectionType);
+                // paneSector.appendChild(paneSectorLink1);
+                playlistPane.appendChild(paneSector);
+            }
+        }
+
+        function clearPlaylist() {
+            //Save the currentPlayingTrack
+            const currentPlayingTrack = playingTrackPathsArray.shift();
+            //Clear both trackPathArrays
+            previousTrackPathsArray.length = 0;
+            playingTrackPathsArray.length = 0;
+            //Re-add the path of the currentPlayingTrack to playingTrackPathsArray
+            playingTrackPathsArray.push(currentPlayingTrack);
+            //Update the playlistPane
+            updatePlaylistPane();
+        }
+
+        function loadTrack(mediaTrackPath) {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Set the videoMode on/off and load textTrack according to the fileExtension
+            const fileExtension = mediaTrackPath.slice(mediaTrackPath.lastIndexOf(".")).toLowerCase();
+            if (Object.keys(extensionsDataObject.movieExtensions).includes(fileExtension)) {
+                document.getElementById("body").classList.add("videoMode");
+                //Load the .vtt textTrack of the same name
+                loadTextTrack(mediaTrackPath.replace(fileExtension, ".vtt"));
+            } else {
+                document.getElementById("body").classList.remove("videoMode");
+                mediaController.innerHTML = "";
+            }
+            //Update mediaController
+            mediaController.src = mediaTrackPath;
+            //Get mediaInfoSector
+            const mediaInfoSector = document.getElementById("mediaInfoSector");
+            //Clear mediaInfoSector
+            mediaInfoSector.innerHTML = "";
+            //panelSectorTitle creation
+            const mediaInfoSectorTitle = document.createElement("h1");
+            mediaInfoSectorTitle.setAttribute("class", "title");
+            mediaInfoSectorTitle.innerHTML = mediaTrackPath.slice(mediaTrackPath.lastIndexOf("/") + 1, mediaTrackPath.lastIndexOf("."));
+            //panelSectorArtist creation
+            const mediaInfoSectorArtist = document.createElement("p");
+            mediaInfoSectorArtist.setAttribute("class", "infoDisplayLarge");
+            mediaInfoSectorArtist.innerHTML = "Media Artist";
+            //panelSectorAlbum creation
+            const mediaInfoSectorAlbum = document.createElement("p");
+            mediaInfoSectorAlbum.setAttribute("class", "infoDisplayMedium");
+            mediaInfoSectorAlbum.innerHTML = "Album";
+            //Append elements to HTML
+            mediaInfoSector.appendChild(mediaInfoSectorTitle);
+            mediaInfoSector.appendChild(mediaInfoSectorArtist);
+            mediaInfoSector.appendChild(mediaInfoSectorAlbum);
+        }
+
+        function loadTextTrack(textTrackPath) {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Remove all trackElements from mediaController
+            mediaController.innerHTML = "";
+            //Create textTrack
+            const textTrack = document.createElement("track");
+            textTrack.id = "textTrack";
+            textTrack.kind = "subtitles";
+            textTrack.src = textTrackPath;
+            textTrack.default = "default";
+            //Make default subtitles display hidden after the textTrack has loaded
+            textTrack.addEventListener("load", function () {
+                this.track.mode = "hidden";
+            });
+            //Add eventListener to extract current cue and display it in subtitlesDisplay
+            textTrack.addEventListener("cuechange", function () {
+                // Get the subtitlesDisplay
+                const subtitlesDisplay = document.getElementById("subtitlesDisplay");
+                //Make sure only to listen oncueenter event
+                if (textTrack.track.activeCues[0] !== undefined) {
+                    subtitlesDisplay.style.visibility = "visible";
+                    subtitlesDisplay.innerHTML = textTrack.track.activeCues[0].text;
+                } else {
+                    subtitlesDisplay.style.visibility = "hidden";
+                }
+            });
+            //Append element into HTML
+            mediaController.appendChild(textTrack);
+        }
+
+        function updateInterface() {
+            //Get the mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Calculate the size of a single unit (seconds per degree)
+            const unit = mediaController.duration / 360;
+            //Calculate theta using currentTime
+            const theta = mediaController.currentTime / unit;
+            //Rotate seekSliderThumbContainer theta degrees
+            document.getElementById("seekSliderThumbContainer").style.transform = "rotate(" + theta + "deg)";
+            //Update playTimeDisplay with the currentPlayTime
+            document.getElementById("playTimeDisplay").innerHTML = formatTime(mediaController.currentTime);
+        }
+
+        function pauseTrack() {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Pause the currentPlayingTrack
+            mediaController.pause();
+            //Remove the autoplay ability to help navigate tracks maintaining the pausedState
+            mediaController.removeAttribute("autoplay");
+        }
+
+        function continueTrack() {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Play the track if "src" or playingTrackPathsArray[0] is available            
+            if (mediaController.src === "" && playingTrackPathsArray.length > 0) {
+                loadTrack(playingTrackPathsArray[0]);
+            } else if (mediaController.src === "") {
+                window.alert("No media is loaded");
+            } else {
+                //Add the autoplay ability to help instant play of next track
+                mediaController.setAttribute("autoplay", "autoplay");
+                //Play the currentLoadedTrack
+                mediaController.play();
+            }
+        }
+
+        function reloadTrack() {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Add the autoplay ability to help instant play of the track
+            mediaController.setAttribute("autoplay", "autoplay");
+            //Reload track
+            document.getElementById("mediaController").load();
+        }
+
+        function playPreviousTrack() {
+            //Check if there are any previousTrackPaths
+            if (previousTrackPathsArray.length === 0) {
+                window.alert("No previous track records");
+            } else {
+                //Get the previousTrackPath and remove it from previousTrackPathsArray
+                const previousTrackPath = previousTrackPathsArray.pop();
+                //Add it to the beginning(i.e. first index) of the playingTrackPaths array
+                playingTrackPathsArray.unshift(previousTrackPath);
+                //Now play the first track from playIngTrackPathsArray
+                loadTrack(playingTrackPathsArray[0]);
+                //Update playlistPane
+                updatePlaylistPane();
+            }
+        }
+
+        function playNextTrack() {
+            //Check if there are any upcoming tracks
+            if (playingTrackPathsArray.length > 1) {
+                //Move currentPlayingTrack from playingTrackPathsArray to previousTrackPathsArray
+                previousTrackPathsArray.push(playingTrackPathsArray.shift());
+                //Now play the first track from playIngTrackPathsArray
+                loadTrack(playingTrackPathsArray[0]);
+                //Update playlistPane
+                updatePlaylistPane();
+            } else {
+                // window.alert("End of playlist reached. Consider adding new tracks using 'Add To Playlist' feature.");
+                //Pause the mediaController to retain pausedState
+                pauseTrack();
+            }
+        }
+
+        //INFO: POSSIBLE UNIFICATION
+        function onOffWidescreenMode() {
+            //Get the relevant checkbox status
+            const checkbox = document.getElementById("widescreenMode");
+            //Get the mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Apply changes according to the checkbox status
+            if (checkbox.checked) {
+                document.getElementById("body").classList.remove("regularMode");
+                mediaController.classList.remove("mediaController-regular");
+            } else {
+                document.getElementById("body").classList.add("regularMode");
+                mediaController.classList.add("mediaController-regular");
+            }
+        }
+
+        //INFO: POSSIBLE UNIFICATION
+        function preserveIgnoreAspectRatio() {
+            //Now play the first track from playIngTrackPathsArray
+            const checkbox = document.getElementById("preserveAspectRatio");
+            //Get the mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Apply changes according to the checkbox status
+            if (checkbox.checked) {
+                mediaController.classList.add("mediaController-preservedRatio");
+            } else {
+                mediaController.classList.remove("mediaController-preservedRatio");
+            }
+        }
+
+        function initialize() {
+            //Request extensionsDataObject
+            parseHttpDataRequest("System64/Registry/ExtensionsLibrary.json", undefined, "json", function (responseObject) {
+                extensionsDataObject = responseObject;
+            });
+
+            //Get mediaController, seekSliderThumb and statusDisplay
+            const mediaController = document.getElementById("mediaController");
+            //Set initial mediaControllerVolume
+            mediaController.volume = 0.5;
+            const seekSliderThumb = document.getElementById("seekSliderThumb");
+            const statusDisplay = document.getElementById("statusDisplay");
+            //Add eventListeners to the mediaController and seekSliderThumb
+            mediaController.addEventListener("loadstart", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "BUFFERING";
+                //Remove ability to seek
+                seekSliderThumb.removeEventListener("mousedown", enableSeek);
+            });
+            mediaController.addEventListener("canplay", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "PAUSED";
+                //Add ability to seek
+                seekSliderThumb.addEventListener("mousedown", enableSeek);
+            });
+            mediaController.addEventListener("playing", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "STREAMING";
+            });
+            //Add eventListener for updating the interface
+            mediaController.addEventListener("timeupdate", updateInterface);
+            mediaController.addEventListener("pause", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "PAUSED";
+            });
+            mediaController.addEventListener("waiting", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "BUFFERING";
+                //Remove ability to seek
+                seekSliderThumb.removeEventListener("mousedown", enableSeek);
+            });
+            mediaController.addEventListener("ended", function () {
+                //Output relevant message
+                statusDisplay.innerHTML = "ON STANDBY";
+                //Check if there are any tracks in playingTrackPathsArray aside from currentPlayingTrack
+                playNextTrack();
+            });
+            //Define the function that enables seek functionality
+            function enableSeek() {
+                function startSeek() {
+                    //Disable updating of the interface
+                    mediaController.removeEventListener("timeupdate", updateInterface);
+                }
+                function mouseMoveSeekThumb() {
+                    //Update statusDisplay with the currentSeekedTime
+                    const seekedTime = getCircularSliderValue(seekSliderThumb.parentElement, mediaController.duration);
+                    statusDisplay.innerHTML = formatTime(seekedTime);
+                }
+                function endSeek() {
+                    //Get sliderValue
+                    const seekedTime = getCircularSliderValue(seekSliderThumb.parentElement, mediaController.duration);
+                    //Set mediaController's currentTime to match seekedTime
+                    mediaController.currentTime = seekedTime;
+                    //Reinstate added or removed eventListeners
+                    mediaController.addEventListener("timeupdate", updateInterface);
+                }
+                startDragCircularSlider(seekSliderThumb, startSeek, mouseMoveSeekThumb, endSeek);
+            }
+            //Get volumeSliderThumb
+            const volumeSliderThumb = document.getElementById("volumeSliderThumb");
+            //Add eventListener for volumeSliderThumb
+            volumeSliderThumb.addEventListener("mousedown", function () {
+                function mouseMoveVolumeThumb() {
+                    //calculate seekedVolume
+                    const seekedVolume = Math.floor(getCircularSliderValue(volumeSliderThumb.parentElement, 1) * 100) / 100;
+                    //Set mediaController.volume to match seekedVolume
+                    mediaController.volume = seekedVolume;
+                    //Update volumeDisplay with the currentSeekedVolume
+                    document.getElementById("volumeDisplay").innerHTML = Math.floor((seekedVolume * 100)) + "%";
+                }
+                startDragCircularSlider(volumeSliderThumb, undefined, mouseMoveVolumeThumb, undefined);
+            });
+        }
+    </script>
+</head>
+
+<body id="body" class="body" onload="initialize();">
+    <!-- sidebarArea -->
+    <div id="sidebarArea" class="sidebarArea">
+        <div class="sidebarAreaDivision sidebarAreaDivision-active" onclick="switchPane('homePane', this);"><span class="label">HOME</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('libraryPane', this);"><span class="label">LIBRARY</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('playlistPane', this);"><span class="label">PLAYLIST</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('settingsPane', this);"><span class="label">SETTINGS</span></div>
+        <div class="sidebarAreaDivision"></div>
+    </div>
+    <!-- paneArea -->
+    <div id="paneArea" class="paneArea">
+        <div id="homePane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector"></div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Navigate To Directory</h1>
+                <input id="inputNavigateDirectory" type="text" placeholder="Path for a media directory..." class="textInput"
+                    value="User/Audios/" />
+                <button class="button" onclick="changeDirectory();"><span class="label">NAVIGATE</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Jump To</h1>
+                <button class="button" onclick="document.getElementById('inputNavigateDirectory').value = 'User/Audios/'; changeDirectory();"><span
+                        class="label">AUDIOS</span></button>
+                <button class="button" onclick="document.getElementById('inputNavigateDirectory').value = 'User/Movies/'; changeDirectory();"><span
+                        class="label">MOVIES</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Search</h1>
+                <input id="synchronizableInputSecondary" type="text" placeholder="Search for a media file..." class="textInput"
+                    value="" />
+                <button class="button" onclick="changeDirectory();"><span class="label">SEARCH</span></button>
+            </div>
+        </div>
+        <div id="libraryPane" class="paneAreaDivision">
+
+        </div>
+        <div id="playlistPane" class="paneAreaDivision">
+
+        </div>
+        <div id="settingsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Widescreen Mode <input id="widescreenMode" type="checkbox" class="checkboxInput"
+                        checked="checked" onclick="onOffWidescreenMode();" /></h1>
+                <p class="definition">Turn this on to optimize screen for 21:9 movies. Turning this off will optimize
+                    screen for 16:9 movies</p>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Preserve Aspect Ratio <input id="preserveAspectRatio" type="checkbox" class="checkboxInput"
+                        onclick="preserveIgnoreAspectRatio();" /></h1>
+                <p class="definition">Turn this on to prevent cropped videos. This option ensures visibility of every
+                    pixel in the movie.</p>
+            </div>
+        </div>
+    </div>
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="controlsPanel" class="panelAreaDivision">
+            <div class="seekSliderContainer">
+                <div id="seekSliderThumbContainer" class="seekSliderThumbContainer">
+                    <div id="seekSliderThumb" class="seekSliderThumb"></div>
+                </div>
+                <span id="playTimeDisplay" class="infoDisplayLarge">&mu;6</span>
+                <span id="statusDisplay" class="label">READY</span>
+            </div>
+            <div class="volumeSliderContainer">
+                <div id="volumeSliderThumbContainer" class="volumeSliderThumbContainer" style="transform: rotate(180deg);">
+                    <div id="volumeSliderThumb" class="volumeSliderThumb"></div>
+                </div>
+                <span id="volumeDisplay" style="position: absolute;">50%</span>
+            </div>
+        </div>
+    </div>
+    <!-- infoArea -->
+    <div id="infoArea" class="infoArea">
+        <div class="infoAreaDivision">
+            <div id="subtitleSector" class="infoAreaDivisionSector">
+
+            </div>
+            <div class="infoAreaDivisionSector"></div>
+            <div id="mediaInfoSector" class="infoAreaDivisionSector" style="height: 40%;">
+
+            </div>
+        </div>
+    </div>
+    <!-- controlsArea -->
+    <div id="controlsArea" class="controlsArea">
+        <div class="controlsAreaDivision" onclick="continueTrack();"><span class="label">PLAY</span></div>
+        <div class="controlsAreaDivision" onclick="pauseTrack();"><span class="label">PAUSE</span></div>
+        <div class="controlsAreaDivision" onclick="reloadTrack();"><span class="label">REPLAY</span></div>
+        <div class="controlsAreaDivision" onclick="playPreviousTrack();"><span class="label">PREVIOUS</span></div>
+        <div class="controlsAreaDivision" onclick="playNextTrack();"><span class="label">NEXT</span></div>
+    </div>
+    <!-- mediaController -->
+    <video id="mediaController" class="mediaController">
+
+    </video>
+    <!-- subtitlesDisplayArea -->
+    <div class="subtitlesDisplayContainer">
+        <pre id="subtitlesDisplay" class="subtitlesDisplay"></pre>
+    </div>
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display: none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar" style="width: 300px;">
+            <input id="synchronizableInputPrimary" type="text" placeholder="Search current directory..." onkeyup="parseOuterScript('synchronizeInput');" />
+        </div>
+        <div class="startButton" onclick="parseInnerScript('searchDirectory');">
+            <span>Search</span>
+        </div>
+        <div class="quickAccessBar" style="width: 300px;">
+            <span onclick="parseInnerScript('clearPlaylist');">Clear Playlist</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

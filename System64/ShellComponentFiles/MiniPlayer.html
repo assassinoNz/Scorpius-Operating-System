@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Mini Player</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../../AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css" />
+    <link rel="stylesheet" href="../../AppFiles/AppStyleSheets/SerketAppPlatform_Styles.css" />
+
+    <script src="../../AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        .body {
+            grid-template-columns: 100%;
+            grid-template-rows: 100%;
+
+            grid-template-areas:
+                "panel"
+            ;
+        }
+
+        .videoMode > .panelArea {
+            opacity: 0;
+
+            transition: opacity 0.5s;
+        }
+
+        .videoMode:hover > .panelArea {
+            opacity: 1;
+        }
+
+        .panelArea {
+            z-index: 1;
+        }
+
+        .panelAreaDivision {
+            justify-content: center;
+            align-content: center;
+            overflow: hidden;
+
+            background-color: transparent;
+        }
+
+        .seekSliderContainer {
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+
+            height: 90%;
+            width: 90%;
+        }
+
+        .seekSliderThumbContainer {
+            position: absolute;
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+
+            height: 280px;
+            width: 280px;
+            overflow: visible;
+
+            border: 40px solid var(--panelDivisionBackgroundColor);
+            border-bottom-color: var(--panelDivisionBackgroundColor);
+            border-radius: 100%;
+
+            transform: rotate(0deg);
+        }
+
+        .seekSliderThumb {
+            position: relative;
+            bottom: -55px;
+
+            height: 70px;
+            width: 70px;
+
+            background-color: var(--panelDivisionBackgroundColor);
+            border-radius: 100%;
+        }
+
+        .volumeSliderContainer {
+            position: absolute;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            height: 150px;
+            width: 150px;
+        }
+
+        .volumeSliderThumbContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100%;
+            width: 100%;
+
+            transform: rotate(180deg);
+        }
+
+        .volumeSliderThumb {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100%;
+            width: 100%;
+
+            border: thick solid var(--paneDivisionBackgroundColor);
+            border-bottom-color: var(--panelDivisionBackgroundColor);
+            border-radius: 100%;
+        }
+
+        .playPauseButton {
+            position: absolute;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 60px;
+            width: 60px;
+
+            background-color: var(--panelDivisionBackgroundColor);
+            border-radius: 100%;
+
+            transition: transform 0.5s;
+        }
+
+        .playPauseButton:hover {
+            transform: scale(1.2);
+        }
+
+        .closeButton {
+            position: absolute;
+
+            top: 10px;
+            left: 10px;
+
+            height: 30px;
+            width: 30px;
+
+            background-color: var(--paneDivisionBackgroundColor);
+            border-radius: 100%;
+
+            transition: transform 0.5s;
+        }
+
+        .closeButton:hover {
+            transform: scale(1.2);
+        }
+
+        .mediaController {
+            grid-area: panel;
+            position: absolute;
+
+            height: 100%;
+            width: 100%;
+
+            object-fit: cover;
+
+            z-index: 0;
+        }
+    </style>
+
+    <script>
+        function updateInterface() {
+            //Get the mediaController
+            var mediaController = document.getElementById("mediaController");
+            //Calculate the size of a single unit (seconds per degree)
+            var unit = mediaController.duration / 360;
+            //Calculate theta using currentTime
+            var theta = mediaController.currentTime / unit;
+            //Rotate seekSliderThumbContainer theta degrees
+            document.getElementById("seekSliderThumbContainer").style.transform = "rotate(" + theta + "deg)";
+        }
+
+        function continuePauseTrack() {
+            //Get mediaController
+            var mediaController = document.getElementById("mediaController");
+
+            if (mediaController.paused) {
+                mediaController.play();
+            } else {
+                mediaController.pause();
+            }
+        }
+
+        function initialize() {
+            //Get mediaController, seekSliderThumb and statusDisplay
+            var mediaController = document.getElementById("mediaController");
+            //Get play/pause button
+            var playPauseButton = document.getElementById("playPauseButton");
+            //Set initial mediaControllerVolume
+            mediaController.volume = 0.5;
+            var seekSliderThumb = document.getElementById("seekSliderThumb");
+            //Add eventListeners to the mediaController and seekSliderThumb
+            mediaController.addEventListener("loadstart", function () {
+                //Remove ability to seek
+                seekSliderThumb.removeEventListener("mousedown", enableSeek);
+            });
+            mediaController.addEventListener("canplay", function () {
+                //Add ability to seek
+                seekSliderThumb.addEventListener("mousedown", enableSeek);
+                //Get fileExtension
+                const fileExtension = mediaController.src.slice(mediaController.src.lastIndexOf(".")).toLowerCase();
+                //Change previewBox size according to the movie dimensions
+                if (fileExtension === ".mp4" || fileExtension === ".webm") {
+                    //Add the css styling to hide/show controls onMouseHover
+                    document.getElementById("body").classList.add("videoMode");
+                    //Calculate aspectRatio
+                    const aspectRatio = mediaController.videoWidth / mediaController.videoHeight;
+                    //Get imagePreviewBox's style object
+                    const containerPreviewBoxStyle = parent.document.getElementById("containerPreviewBox").children[0].style;
+                    if (aspectRatio > 1) {
+                        containerPreviewBoxStyle.height = "500px";
+                        containerPreviewBoxStyle.width = (500 * aspectRatio) + "px";
+                    } else if (aspectRatio < 1) {
+                        containerPreviewBoxStyle.height = "600px";
+                        containerPreviewBoxStyle.width = (600 * aspectRatio) + "px";
+                    } else if (aspectRatio === 1) {
+                        containerPreviewBoxStyle.height = "500px";
+                        containerPreviewBoxStyle.width = "500px";
+                    }
+                } else {
+                    //Add the css styling to hide/show controls onMouseHover
+                    document.getElementById("body").classList.remove("videoMode");
+                }
+            });
+            mediaController.addEventListener("play", function () {
+                playPauseButton.innerHTML = "\u23F8";
+            });
+            mediaController.addEventListener("pause", function () {
+                playPauseButton.innerHTML = "\u25B6";
+            });
+            //Add eventListener for updating the interface
+            mediaController.addEventListener("timeupdate", updateInterface);
+            mediaController.addEventListener("waiting", function () {
+                //Remove ability to seek
+                seekSliderThumb.removeEventListener("mousedown", enableSeek);
+            });
+            //Define the function that enables seek functionality
+            function enableSeek() {
+                function startSeek() {
+                    //Disable updating of the interface
+                    mediaController.removeEventListener("timeupdate", updateInterface);
+                }
+                function endSeek() {
+                    //Get sliderValue
+                    var seekedTime = getCircularSliderValue(seekSliderThumb.parentElement, mediaController.duration);
+                    //Set mediaController's currentTime to match seekedTime
+                    mediaController.currentTime = seekedTime;
+                    //Reinstate added or removed eventListeners
+                    mediaController.addEventListener("timeupdate", updateInterface);
+                }
+                startDragCircularSlider(seekSliderThumb, startSeek, undefined, endSeek);
+            }
+            //Get volumeSliderThumb
+            var volumeSliderThumb = document.getElementById("volumeSliderThumb");
+            //Add eventListener for volumeSliderThumb
+            volumeSliderThumb.addEventListener("mousedown", function () {
+                function mouseMoveVolumeThumb() {
+                    //calculate seekedVolume
+                    var seekedVolume = parseInt(getCircularSliderValue(volumeSliderThumb.parentElement, 1) * 100) / 100;
+                    //Set mediaController.volume to match seekedVolume
+                    mediaController.volume = seekedVolume;
+                }
+                startDragCircularSlider(volumeSliderThumb, undefined, mouseMoveVolumeThumb, undefined);
+            });
+        }
+    </script>
+</head>
+
+<body id ="body" class="body" onload="initialize();">
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="controlsPanel" class="panelAreaDivision">
+            <div class="seekSliderContainer">
+                <div id="seekSliderThumbContainer" class="seekSliderThumbContainer">
+                    <div id="seekSliderThumb" class="seekSliderThumb"></div>
+                </div>
+            </div>
+            <div class="volumeSliderContainer">
+                <div id="volumeSliderThumbContainer" class="volumeSliderThumbContainer" style="transform: rotate(180deg);">
+                    <div id="volumeSliderThumb" class="volumeSliderThumb"></div>
+                </div>
+            </div>
+            <div id="playPauseButton" class="playPauseButton" style="font-size: 150%;" onclick="continuePauseTrack();">
+                &#x23f8;
+            </div>
+            <div id="closeButton" class="closeButton" onclick="
+                //Get this app (previewBoxToClose) from the context of the OS
+                const previewBoxToClose = parent.document.getElementById('containerPreviewBox');
+                //Add the closeAnimation for the previewBoxToClose
+                previewBoxToClose.style.animationName = 'closeWindowAnimation';
+                //Remove previewBoxToClose with a delay to play the animation from the context of the OS
+                parent.setTimeout(function () { previewBoxToClose.remove(); }, 250);">
+            </div>
+        </div>
+    </div>
+
+    <!-- mediaController -->
+    <video id="mediaController" class="mediaController" autoplay="autoplay">
+</body>
+
+</html>

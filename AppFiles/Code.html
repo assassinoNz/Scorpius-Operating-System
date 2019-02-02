@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Code</title>
+    <meta charset="UTF-8">
+
+    <base href="../">
+
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        * {
+            /* border: thin solid red !important; */
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+            font-family: 'Segoe UI Light';
+            font-size: 14px;
+            color: var(--defaultColor);
+            cursor: default;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+
+        .body {
+            display: grid;
+            grid-template-columns: repeat(3, calc(100% / 3));
+            grid-template-rows: 100%;
+
+            grid-template-areas:
+                "textEdit liveView liveView"
+            ;
+
+            height: 100%;
+            width: 100%;
+        }
+
+        .textEditArea {
+            grid-area: textEdit;
+
+            overflow: auto;
+
+            height: 100%;
+            width: 100%;
+            resize: none;
+            padding: 10px;
+
+            font-family: 'Consolas';
+
+            background-color: var(--panelDivisionBackgroundColor);
+            border: none;
+        }
+
+        .liveViewArea {
+            grid-area: liveView;
+
+            height: 100%;
+            width: 100%;
+
+            border: none;
+            background-color: var(--paneDivisionBackgroundColor);
+        }
+    </style>
+    <script>
+        function saveTextToFile() {
+            //Get the filePath from synchronizableInputSecondary
+            const filePath = document.getElementById("synchronizableInputSecondary").value;
+            //Check if the filePath starts with "User/"
+            if (filePath.startsWith("User/") == true) {
+                //Objectify PHP parameters
+                const parametersObject = {
+                    functionString: "saveTextToFile();",
+                    filePath: filePath,
+                    contentString: document.getElementById("textEditArea").value
+                };
+                //Send data to the server for saving
+                parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                    window.alert("Saved to " + filePath);
+                });
+            } else {
+                window.alert("Invalid location");
+            }
+        }
+
+        function readFileToText() {
+            //Get the directoryPath from synchronizableInputSecondary
+            const directoryPath = document.getElementById("synchronizableInputSecondary").value;
+            //Check if the directoryPath starts with "User/"
+            if (directoryPath.startsWith("User/") == true) {
+                //Request data from the server
+                parseHttpDataRequest(directoryPath, undefined, "text", function (fileContentString) {
+                    document.getElementById("textEditArea").value = fileContentString;
+                    makeTextToView();
+                });
+            } else {
+                window.alert("Invalid location");
+            }
+        }
+
+        function makeTextToView() {
+            //Get liveViewAreaContentDocument
+            const liveViewAreaContentDocument = document.getElementById("liveViewArea").contentWindow.document;
+            //Output data to liveViewAreaContentDocument
+            liveViewAreaContentDocument.write(document.getElementById("textEditArea").value);
+            //Close liveViewAreaContentDocument
+            liveViewAreaContentDocument.close();
+        }
+
+        function convertSRTToVTT() {
+            const srtString = document.getElementById("textEditArea").value;
+            let vttString = "WEBVTT\n\n";
+            vttString = vttString + srtString.replace(/(\d),(\d)/g, "$1.$2");
+            document.getElementById("textEditArea").value = vttString;
+        }
+    </script>
+</head>
+
+<body class="body" onload="">
+    <!-- textEditArea -->
+    <textarea id="textEditArea" class="textEditArea" onkeyup="makeTextToView();"></textarea>
+    <!-- liveViewArea -->
+    <iframe id="liveViewArea" class="liveViewArea"></iframe>
+    <input id="synchronizableInputSecondary" type="text" style="visibility: hidden;" value="User/Code Bank/AutoSave.html" />
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display:none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar" style="width: 350px;">
+            <input id="synchronizableInputPrimary" type="text" placeholder="Filename..." value="User/Code Bank/AutoSave.html"
+                onkeyup="parseOuterScript('synchronizeInput');" />
+        </div>
+        <div class="startButton" onclick="">
+            <span>(Format)</span>
+        </div>
+        <div class="quickAccessBar" style="width: 350px;">
+            <span onclick="parseInnerScript('saveTextToFile');">Save</span>
+            <span onclick="parseInnerScript('readFileToText');">Load</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

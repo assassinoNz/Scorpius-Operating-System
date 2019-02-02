@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Character Input</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+    <link rel="stylesheet" href="AppStyleSheets/SerketAppPlatform_Styles.css">
+
+    <script src="AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        .body {
+            grid-template-areas:
+                "sidebar pane pane pane pane pane panel panel panel panel panel panel panel info info info info info info controls"
+            ;
+        }
+
+        .cellContainer {
+            position: absolute;
+
+            display: grid;
+            grid-template-columns: repeat(6, calc(100% / 6));
+            grid-template-rows: repeat(7, calc(100% / 7));
+            
+            grid-template-areas:
+                "gridCell01 gridCell02 gridCell03 gridCell04 gridCell05 gridCell06"
+                "gridCell07 gridCell08 gridCell09 gridCell10 gridCell11 gridCell12"
+                "gridCell13 gridCell14 gridCell15 gridCell16 gridCell17 gridCell18"
+                "gridCell19 gridCell20 gridCell21 gridCell22 gridCell23 gridCell24"
+                "gridCell25 gridCell26 gridCell27 gridCell28 gridCell29 gridCell30"
+                "gridCell31 gridCell32 gridCell33 gridCell34 gridCell35 gridCell36"
+                "gridCell37 gridCell38 gridCell39 gridCell40 gridCell41 gridCell42"
+            ;
+
+            height: 100%;
+            width: 100%;
+
+            opacity: 0.0;
+        }
+
+        .cell {
+            color: transparent;
+            text-align: center;
+        }
+
+        .cell-active {
+            color: yellowgreen;
+            text-align: center;
+
+            background-color: yellowgreen;
+        }
+
+        .canvas {
+            position: absolute;
+
+            height: 100%;
+            width: 100%;
+
+            border-right: solid rgb(100, 100, 100);
+            opacity: 1;
+        }
+    </style>
+    <script>
+        function initialize() {
+            //Assigns eventHandlers for blindPad
+            const blindPad = document.getElementById("cellContainer");
+            blindPad.addEventListener("mousedown", addListeners);
+            blindPad.addEventListener("mousedown", startPaint);
+            //Get canvas and its context2D
+            const canvas = document.getElementById("canvas");
+            const context2D = canvas.getContext("2d");;
+
+            function addListeners() {
+                //Assigns eventHandlers for cells
+                const cellsArray = document.getElementsByClassName("cell");
+                for (let i = 0; i < cellsArray.length; i++) {
+                    cellsArray[i].addEventListener("mousemove", activateCell);
+                }
+                //Assigns eventHandlers for blindPad
+                blindPad.addEventListener("mousemove", strokePaint);
+                //Assigns eventHandlers for window
+                window.addEventListener("mouseup", revokeAddedListeners);
+            }
+
+            function revokeAddedListeners() {
+                //Revokes eventHandlers for cells
+                const cellsArray = document.getElementsByClassName("cell");
+                for (let i = 0; i < cellsArray.length; i++) {
+                    cellsArray[i].removeEventListener("mousemove", activateCell);
+                }
+                //Revokes eventHandlers for blindPad
+                blindPad.removeEventListener("mousemove", strokePaint);
+                //Revokes eventHandlers for window
+                window.removeEventListener("mouseup", revokeAddedListeners);
+            }
+
+            function activateCell() {
+                this.setAttribute("class", "cell-active");
+            }
+
+            //Declares the function for mousedownEvent of blindPad
+            function startPaint(eventDetails) {
+                //Gets mousedownPosition relative to blindPad
+                const coordinateX = eventDetails.clientX - blindPad.getBoundingClientRect().left;
+                const coordinateY = eventDetails.clientY - blindPad.getBoundingClientRect().top;
+
+                //Moves pen onto mousedownPosition relative to blindPad
+                context2D.beginPath();
+                context2D.moveTo(coordinateX, coordinateY);
+            }
+
+            function strokePaint(eventDetails) {
+                const coordinateX = eventDetails.clientX - blindPad.getBoundingClientRect().left;
+                const coordinateY = eventDetails.clientY - blindPad.getBoundingClientRect().top;
+
+                context2D.strokeStyle = "green";
+                context2D.lineTo(coordinateX, coordinateY);
+                context2D.stroke();
+            }
+
+            //Assign canvas dimensions as HTML attributes
+            canvas.height = canvas.getBoundingClientRect().height;
+            canvas.width = canvas.getBoundingClientRect().width;
+        }
+
+        function recognizeCharacter() {
+            //Get activeCellsArray
+            const activeCellsArray = document.getElementsByClassName("cell-active");
+            //Get IDs of activeCellsArray elements into activeCellIDsArray
+            const activeCellIDsArray = [];
+            for (let i = 0; i < activeCellsArray.length; i++) {
+                activeCellIDsArray[i] = activeCellsArray[i].id;
+            }
+            //Create a characterRecognitionWorker
+            const characterRecognitionWorker = new Worker("AppScripts/CharacterInput_Worker.js");
+            //Send the activeCellIDsArray to the characterRecognitionWorker
+            characterRecognitionWorker.postMessage(activeCellIDsArray);
+            //Add eventListener for extracting information sent by th characterRecognitionWorker
+            characterRecognitionWorker.addEventListener("message", function (eventDetails) {
+                //Output results
+                document.getElementById("characterDisplay").innerHTML = eventDetails.data[0];
+                document.getElementById("scriptDisplay").innerHTML = eventDetails.data[1];
+                document.getElementById("probabilityDisplay").innerHTML = eventDetails.data[2];
+                //Terminate worker
+                characterRecognitionWorker.terminate();
+            });
+        }
+
+        function generateActive() {
+            //Get activeCellsArray
+            const activeCellsArray = document.getElementsByClassName("cell-active");
+            //Display activeCellsArray elements' IDs
+            for (let i = 0; i < activeCellsArray.length; i++) {
+                document.getElementById("activeCellIDsDisplay").innerHTML = document.getElementById("activeCellIDsDisplay").innerHTML + '"' + activeCellsArray[i].id + '",';
+            }
+        }
+
+        //INFO: POSSIBLE UNIFICATION
+        function showHideScanningGrid() {
+            const checkbox = document.getElementById("showScanningGrid");
+            const masterContainer = document.getElementById("cellContainer");
+            if (checkbox.checked) {
+                masterContainer.style.opacity = "0.5";
+            } else {
+                masterContainer.style.opacity = "0";
+            }
+        }
+        
+        //WARNING: LOOSELY IMPLEMENTED
+        function clearWorkspace() {
+            const activeCellsArray = document.getElementsByClassName("cell-active");
+            for (let i = 0; i < activeCellsArray.length; i++) {
+                activeCellsArray[i].setAttribute("class", "cell");
+            }
+        }
+    </script>
+</head>
+
+<body id="body" class="body" onload="initialize();">
+    <!-- sidebarArea -->
+    <div id="sidebarArea" class="sidebarArea">
+        <div class="sidebarAreaDivision sidebarAreaDivision-active" onclick="switchPane('panelsPane', this);"><span
+                class="label">PANELS</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('homePane', this);"><span class="label">HOME</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('settingsPane', this);"><span class="label">SETTINGS</span></div>
+    </div>
+    <!-- paneArea -->
+    <div id="paneArea" class="paneArea">
+        <div id="panelsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector paneAreaDivisionSector-active" onclick="switchPanel('inputCanvasPanel', this);">
+                <h1 class="title">Input Canvas</h1>
+                <p class="definition">Displays the canvas where to draw the character</p>
+            </div>
+        </div>
+
+        <div id="homePane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Run Recognition</h1>
+                <button class="button" onclick="recognizeCharacter();"><span class="label">RUN</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Clear Workspace</h1>
+                <button class="button" onclick="clearWorkspace();"><span class="label">CLEAR</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Generate</h1>
+                <p id="activeCellsDisplay" class="definition" style="font-size: 5px; -ms-user-select: text;"></p>
+                <button class="button" onclick="generateActive();"><span class="label">GENERATE</span></button>
+            </div>
+        </div>
+
+        <div id="settingsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Show Scanning Grid <input id="showScanningGrid" type="checkbox" class="checkboxInput"
+                        onclick="showHideScanningGrid();" /></h1>
+                <p class="definition">Turn this on to view the grid used for pattern recognition</p>
+            </div>
+        </div>
+
+    </div>
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="inputCanvasPanel" class="panelAreaDivision" style="position: relative; grid-area: inputPanelAreaDivision;">
+            <canvas id="canvas" class="canvas"></canvas>
+            <div id="cellContainer" class="cellContainer">
+                <div id="1" class="cell" style="grid-area: gridCell01;">01</div>
+                <div id="2" class="cell" style="grid-area: gridCell02;">02</div>
+                <div id="3" class="cell" style="grid-area: gridCell03;">03</div>
+                <div id="4" class="cell" style="grid-area: gridCell04;">04</div>
+                <div id="5" class="cell" style="grid-area: gridCell05;">05</div>
+                <div id="6" class="cell" style="grid-area: gridCell06;">06</div>
+                <div id="7" class="cell" style="grid-area: gridCell07;">07</div>
+                <div id="8" class="cell" style="grid-area: gridCell08;">08</div>
+                <div id="9" class="cell" style="grid-area: gridCell09;">09</div>
+                <div id="10" class="cell" style="grid-area: gridCell10;">10</div>
+
+                <div id="11" class="cell" style="grid-area: gridCell11;">11</div>
+                <div id="12" class="cell" style="grid-area: gridCell12;">12</div>
+                <div id="13" class="cell" style="grid-area: gridCell13;">13</div>
+                <div id="14" class="cell" style="grid-area: gridCell14;">14</div>
+                <div id="15" class="cell" style="grid-area: gridCell15;">15</div>
+                <div id="16" class="cell" style="grid-area: gridCell16;">16</div>
+                <div id="17" class="cell" style="grid-area: gridCell17;">17</div>
+                <div id="18" class="cell" style="grid-area: gridCell18;">18</div>
+                <div id="19" class="cell" style="grid-area: gridCell19;">19</div>
+                <div id="20" class="cell" style="grid-area: gridCell20;">20</div>
+
+                <div id="21" class="cell" style="grid-area: gridCell21;">21</div>
+                <div id="22" class="cell" style="grid-area: gridCell22;">22</div>
+                <div id="23" class="cell" style="grid-area: gridCell23;">23</div>
+                <div id="24" class="cell" style="grid-area: gridCell24;">24</div>
+                <div id="25" class="cell" style="grid-area: gridCell25;">25</div>
+                <div id="26" class="cell" style="grid-area: gridCell26;">26</div>
+                <div id="27" class="cell" style="grid-area: gridCell27;">27</div>
+                <div id="28" class="cell" style="grid-area: gridCell28;">28</div>
+                <div id="29" class="cell" style="grid-area: gridCell29;">29</div>
+
+                <div id="30" class="cell" style="grid-area: gridCell30;">30</div>
+                <div id="31" class="cell" style="grid-area: gridCell31;">31</div>
+                <div id="32" class="cell" style="grid-area: gridCell32;">32</div>
+                <div id="33" class="cell" style="grid-area: gridCell33;">33</div>
+                <div id="34" class="cell" style="grid-area: gridCell34;">34</div>
+                <div id="35" class="cell" style="grid-area: gridCell35;">35</div>
+                <div id="36" class="cell" style="grid-area: gridCell36;">36</div>
+                <div id="37" class="cell" style="grid-area: gridCell37;">37</div>
+                <div id="38" class="cell" style="grid-area: gridCell38;">38</div>
+                <div id="39" class="cell" style="grid-area: gridCell39;">39</div>
+                <div id="40" class="cell" style="grid-area: gridCell40;">40</div>
+
+                <div id="41" class="cell" style="grid-area: gridCell41;">41</div>
+                <div id="42" class="cell" style="grid-area: gridCell42;">42</div>
+            </div>
+        </div>
+    </div>
+    <!-- infoArea -->
+    <div id="infoArea" class="infoArea">
+        <div class="infoAreaDivision">
+            <div class="infoAreaDivisionSector">
+                <p id="activeCellIDsDisplay" style="font-size: 5px; -ms-user-select: initial; -moz-user-select: text; -webkit-user-select: text;"></p>
+            </div>
+            <div class="infoAreaDivisionSector"></div>
+            <div class="infoAreaDivisionSector">
+                <h1 class="title">Recognized as</h1>
+                <p id="characterDisplay" class="infoDisplayLarge"></p>
+            </div>
+            <div class="infoAreaDivisionSector">
+                <h1 class="title">With a probability of</h1>
+                <p id="probabilityDisplay" class="infoDisplayLarge"></p>
+            </div>
+            <div class="infoAreaDivisionSector">
+                <h1 class="title">From</h1>
+                <p id="scriptDisplay" class="infoDisplayMedium"></p>
+            </div>
+        </div>
+    </div>
+    <!-- controlsArea -->
+    <div id="controlsArea" class="controlsArea">
+
+    </div>
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display: none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar">
+            <!-- <input id="synchronizableInputPrimary" type="text" value="" onkeyup="parseOuterScript('synchronizeInput');" /> -->
+        </div>
+        <div class="startButton" onclick="parseInnerScript('recognizeCharacter');">
+            <span>Run</span>
+        </div>
+        <div class="quickAccessBar">
+            <span onclick="parseInnerScript('generateActive');">(Generate)</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

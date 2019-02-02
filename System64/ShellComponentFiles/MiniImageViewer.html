@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Mini Image Viewer</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../../AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css" />
+    <link rel="stylesheet" href="../../AppFiles/AppStyleSheets/SerketAppPlatform_Styles.css" />
+
+    <style>
+        .body {
+            grid-template-columns: 100%;
+            grid-template-rows: 100%;
+
+            grid-template-areas:
+                "panel"
+            ;
+        }
+
+        .closeButton {
+            position: absolute;
+
+            top: 10px;
+            left: 10px;
+
+            height: 30px;
+            width: 30px;
+
+            background-color: var(--paneDivisionBackgroundColor);
+            border-radius: 100%;
+
+            transition: transform 0.5s;
+        }
+
+        .closeButton:hover {
+            transform: scale(1.2);
+        }
+
+        .mediaController {
+            grid-area: panel;
+            position: absolute;
+
+            height: 100%;
+            width: 100%;
+
+            object-fit: cover;
+
+            z-index: 0;
+        }
+    </style>
+
+    <script>
+        //Define orientation variable to reduce styling cost
+        function initialize() {
+            //Get mediaController
+            const mediaController = document.getElementById("mediaController");
+            //Get imagePreviewBox's style object
+            const imagePreviewBoxStyle = parent.document.getElementById("imagePreviewBox").children[0].style;
+            //Add eventListener for load the imaginaryImage
+            mediaController.addEventListener("load", function () {
+                const aspectRatio = mediaController.naturalWidth / mediaController.naturalHeight;
+                if (aspectRatio > 1) {
+                    imagePreviewBoxStyle.height = "500px";
+                    imagePreviewBoxStyle.width = (500 * aspectRatio) + "px";
+                } else if (aspectRatio < 1) {
+                    imagePreviewBoxStyle.height = "600px";
+                    imagePreviewBoxStyle.width = (600 * aspectRatio) + "px";
+                } else if (aspectRatio === 1) {
+                    imagePreviewBoxStyle.height = "500px";
+                    imagePreviewBoxStyle.width = "500px";
+                }
+            });
+        }
+    </script>
+</head>
+
+<body class="body" onload="initialize();">
+    <img id="mediaController" class="mediaController" />
+    <div id="closeButton" class="closeButton" onclick="
+        //Get this app (previewBoxToClose) from the context of the OS
+        const previewBoxToClose = parent.document.getElementById('imagePreviewBox');
+        //Add the closeAnimation for the previewBoxToClose
+        previewBoxToClose.style.animationName = 'closeWindowAnimation';
+        //Remove previewBoxToClose with a delay to play the animation from the context of the OS
+        parent.setTimeout(function () { previewBoxToClose.remove(); }, 250);">
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Motion</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+    <link rel="stylesheet" href="AppStyleSheets/SerketAppPlatform_Styles.css">
+
+    <script src="AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        :root {
+            --panelDivisionBackgroundColor: var(--paneDivisionBackgroundColor);
+        }
+
+        .body {
+            grid-template-areas:
+                "panel panel panel panel panel panel panel panel panel panel panel panel panel panel panel panel panel panel panel controls"
+            ;
+        }
+
+        .panelAreaDivision {
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .panelAreaDivision:hover {
+            overflow: hidden;
+        }
+
+        .physicsObject {
+            position: absolute;
+            bottom: 0;
+            left: 100px;
+
+            height: 70px;
+            width: 70px;
+
+            background-image: url("ImageRes/Motion_PhysicsObject.png");
+            background-position: center center;
+            background-size: contain;
+        }
+    </style>
+
+    <script>
+        //Declare and initialize global variables
+        let nthSecondV = 1;
+        let verticalDirection = true;
+        let nthSecondH = 1;
+        let horizontalDirection = true;
+        let idVertical = null;
+        let idHorizontal = null;
+
+        function repeatVerticalBottom(ball, acceleration, coefficient) {
+            const verticalTravel = (2 * nthSecondV - 1) * (acceleration / 2);
+            const verticalLimitBottom = parseInt(window.getComputedStyle(ball.parentElement).height) - ball.offsetHeight;
+            const ballMarginTop = parseInt(ball.style.top);
+
+            if (verticalDirection == true) {
+                const newBallMarginTop = ballMarginTop + verticalTravel;
+
+                if (newBallMarginTop >= verticalLimitBottom) {
+                    ball.style.top = verticalLimitBottom + "px";
+                    nthSecondV = nthSecondV - coefficient;
+                    verticalDirection = false;
+                    if (nthSecondV <= 1) {
+                        window.clearInterval(idVertical);
+                    }
+                } else {
+                    ball.style.top = newBallMarginTop + "px";
+                    nthSecondV++;
+                }
+            } else {
+                const newBallMarginTop = ballMarginTop - verticalTravel;
+
+                if (nthSecondV <= 1) {
+                    nthSecondV = 1;
+                    verticalDirection = true;
+                } else {
+                    ball.style.top = newBallMarginTop + "px";
+                    nthSecondV--;
+                }
+            }
+        }
+
+        function repeatVerticalTop(ball, acceleration, coefficient) {
+            const verticalTravel = (2 * nthSecondV - 1) * (acceleration / 2);
+            const verticalLimitTop = 0;
+            const ballMarginTop = parseInt(ball.style.top);
+
+            if (verticalDirection == true) {
+                const newBallMarginTop = ballMarginTop - verticalTravel;
+
+                if (newBallMarginTop <= verticalLimitTop) {
+                    ball.style.top = verticalLimitTop + "px";
+                    nthSecondV = nthSecondV - coefficient;
+                    verticalDirection = false;
+                    if (nthSecondV <= 1) {
+                        window.clearInterval(idVertical);
+                    }
+                } else {
+                    ball.style.top = newBallMarginTop + "px";
+                    nthSecondV++;
+                }
+            } else {
+                const newBallMarginTop = ballMarginTop + verticalTravel;
+
+                if (nthSecondV <= 1) {
+                    nthSecondV = 1;
+                    verticalDirection = true;
+                } else {
+                    ball.style.top = newBallMarginTop + "px";
+                    nthSecondV--;
+                }
+            }
+        }
+
+        function repeatHorizontalRight(ball, acceleration, coefficient) {
+            const horizontalTravel = (2 * nthSecondH - 1) * (acceleration / 2);
+            const horizontalLimitRight = parseInt(window.getComputedStyle(ball.parentElement).width) - ball.offsetWidth;
+            const ballMarginLeft = parseInt(ball.style.left);
+
+            if (horizontalDirection == true) {
+                const newBallMarginLeft = ballMarginLeft + horizontalTravel;
+
+                if (newBallMarginLeft >= horizontalLimitRight) {
+                    ball.style.left = horizontalLimitRight + "px";
+                    nthSecondH = nthSecondH - coefficient;
+                    horizontalDirection = false;
+                    if (nthSecondH <= 1) {
+                        window.clearInterval(idHorizontal);
+                    }
+                } else {
+                    ball.style.left = newBallMarginLeft + "px";
+                    nthSecondH++;
+                }
+            } else {
+                const newBallMarginLeft = ballMarginLeft - horizontalTravel;
+
+                if (nthSecondH <= 1) {
+                    nthSecondH = 1;
+                    horizontalDirection = true;
+                } else {
+                    ball.style.left = newBallMarginLeft + "px";
+                    nthSecondH--;
+                }
+            }
+        }
+
+        function repeatHorizontalLeft(ball, acceleration, coefficient) {
+            const horizontalTravel = (2 * nthSecondH - 1) * (acceleration / 2);
+            const horizontalLimitLeft = 0;
+            const ballMarginLeft = parseInt(ball.style.left);
+
+            if (horizontalDirection == true) {
+                const newBallMarginLeft = ballMarginLeft - horizontalTravel;
+
+                if (newBallMarginLeft <= horizontalLimitLeft) {
+                    ball.style.left = horizontalLimitLeft + "px";
+                    nthSecondH = nthSecondH - coefficient;
+                    horizontalDirection = false;
+                    if (nthSecondH <= 1) {
+                        window.clearInterval(idHorizontal);
+                    }
+                } else {
+                    ball.style.left = newBallMarginLeft + "px";
+                    nthSecondH++;
+                }
+            } else {
+                const newBallMarginLeft = ballMarginLeft + horizontalTravel;
+
+                if (nthSecondH <= 1) {
+                    nthSecondH = 1;
+                    horizontalDirection = true;
+                } else {
+                    ball.style.left = newBallMarginLeft + "px";
+                    nthSecondH--;
+                }
+            }
+        }
+
+        function startDragObject(eventDetails, object, isMouseInput) {
+            //Clear all animations
+            window.clearInterval(idVertical);
+            window.clearInterval(idHorizontal);
+            let differenceX;
+            let differenceY;
+            if (isMouseInput == true) {
+                //Get the differences of object position an mouse position
+                differenceX = eventDetails.clientX - object.offsetLeft;
+                differenceY = eventDetails.clientY - object.offsetTop;
+                //Add eventListeners
+                window.addEventListener("mousemove", mouseMoveObject);
+                window.addEventListener("mouseup", mouseUpObject);
+            } else {
+                //Get the differences of object position an mouse position
+                differenceX = eventDetails.touches[0].clientX - object.offsetLeft;
+                differenceY = eventDetails.touches[0].clientY - object.offsetTop;
+                //Add eventListeners
+                window.addEventListener("touchmove", touchMoveObject);
+                window.addEventListener("touchend", mouseUpObject);
+            }
+            //Declare the function for mouseMove event
+            function mouseMoveObject(eventDetails) {
+                object.style.left = eventDetails.clientX - differenceX + "px";
+                object.style.top = eventDetails.clientY - differenceY + "px";
+            }
+            //Declare the function for touchMove event
+            function touchMoveObject(eventDetails) {
+                object.style.left = eventDetails.touches[0].clientX - differenceX + "px";
+                object.style.top = eventDetails.touches[0].clientY - differenceY + "px";
+            }
+            //Declare the function for mouseup event
+            function mouseUpObject() {
+                //Start animation
+                idVertical = window.setInterval(repeatVerticalBottom, 25, object, 1, 4);
+                // idHorizontal = window.setInterval(repeatHorizontalRight, 25, object, 1, 4);
+
+                window.removeEventListener("mousemove", mouseMoveObject);
+                window.removeEventListener("touchmove", touchMoveObject);
+                window.removeEventListener("mouseup", mouseUpObject);
+                window.removeEventListener("touchend", mouseUpObject);
+            }
+        }
+
+        function setGravityUp() {
+            window.clearInterval(idVertical);
+            nthSecondV = 1;
+            idVertical = window.setInterval(repeatVerticalTop, 25, document.getElementById('physicsObject'), 1, 4);
+        }
+
+        function setGravityDown() {
+            window.clearInterval(idVertical);
+            nthSecondV = 1;
+            idVertical = window.setInterval(repeatVerticalBottom, 25, document.getElementById('physicsObject'), 1, 4);
+        }
+
+        function setGravityLeft() {
+            window.clearInterval(idHorizontal);
+            nthSecondH = 1;
+            idHorizontal = window.setInterval(repeatHorizontalLeft, 25, document.getElementById('physicsObject'), 1, 4);
+        }
+
+        function setGravityRight() {
+            window.clearInterval(idHorizontal);
+            nthSecondH = 1;
+            idHorizontal = window.setInterval(repeatHorizontalRight, 25, document.getElementById('physicsObject'), 1, 4);
+        }
+
+        function pauseHorizontal() {
+            window.clearInterval(idHorizontal);
+        }
+
+        function pauseVertical() {
+            window.clearInterval(idVertical);
+        }
+
+        function pauseAll() {
+            window.clearInterval(idHorizontal);
+            window.clearInterval(idVertical);
+        }
+
+        function initialization() {
+            //Add mousedownListener for the physicsObject
+            document.getElementById("physicsObject").addEventListener("mousedown", function (eventDetails) {
+                startDragObject(eventDetails, this, true);
+            });
+            //Add touchstartListener for the physicsObject
+            document.getElementById("physicsObject").addEventListener("touchstart", function (eventDetails) {
+                startDragObject(eventDetails, this, false);
+            });
+        }
+    </script>
+</head>
+
+<body class="body" onload="initialization();">
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="contentPanel" class="panelAreaDivision">
+            <div id="physicsObject" class="physicsObject" style="bottom: 0; left: 100px;"></div>
+        </div>
+    </div>
+    <!-- controlsArea -->
+    <div id="controlsArea" class="controlsArea">
+        <div class="controlsAreaDivision" onclick="setGravityUp();"><span class="label">UP</span></div>
+        <div class="controlsAreaDivision" onclick="setGravityDown();"><span class="label">DOWN</span></div>
+        <div class="controlsAreaDivision" onclick="setGravityLeft();"><span class="label">LEFT</span></div>
+        <div class="controlsAreaDivision" onclick="setGravityRight();"><span class="label">RIGHT</span></div>
+    </div>
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display: none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar" style="width: 300px; justify-content: flex-start; padding-left: 10px;">
+            <span onclick="parseInnerScript('pauseHorizontal');">Pause Horizontal</span>
+            <span onclick="parseInnerScript('pauseVertical');">Pause Vertical</span>
+        </div>
+        <div class="startButton" onclick="parseInnerScript('pauseAll');">
+            <span>Pause</span>
+        </div>
+        <div class="quickAccessBar" style="width: 300px;">
+
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Scorpius",
+  "version": "1.0.0",
+  "description": "An OS-like environment build entirely from web technologies",
+  "main": "ScorpiusServer.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "Nirmal Diaz (Assassino)",
+  "license": "ISC"
+}

@@ -1,0 +1,36 @@
+{
+    "shellThemes": {
+        "Customized": [
+            "System64/ShellStyleSheets/Shell_StyleVariables.json",
+            "System64/ImageRes/ThemeIcon_Shell.png",
+            ""
+        ],
+        "Graphite": [
+            "System64/ShellStyleSheets/Shell_StyleVariables_Graphite.json",
+            "System64/ImageRes/ThemeIcon_Shell.png",
+            ""
+        ],
+        "Royale": [
+            "System64/ShellStyleSheets/Shell_StyleVariables_Royale.json",
+            "System64/ImageRes/ThemeIcon_Shell.png",
+            ""
+        ]
+    },
+    "serketAppPlatformThemes": {
+        "Customized": [
+            "AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.json",
+            "System64/ImageRes/ThemeIcon_App.png",
+            ""
+        ],
+        "Graphite": [
+            "AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables_Graphite.json",
+            "System64/ImageRes/ThemeIcon_App.png",
+            ""
+        ],
+        "Royale": [
+            "AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables_Royale.json",
+            "System64/ImageRes/ThemeIcon_App.png",
+            ""
+        ]
+    }
+}

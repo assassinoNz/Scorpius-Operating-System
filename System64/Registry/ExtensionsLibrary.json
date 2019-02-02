@@ -1,0 +1,112 @@
+{
+    "audioExtensions": {
+        ".mp3": [
+            "Audio File",
+            "audio/mp3",
+            "System64/ImageRes/FileIcon_Audio.png"
+        ],
+        ".wav": [
+            "Audio File",
+            "audio/wav",
+            "System64/ImageRes/FileIcon_Audio.png"
+        ]
+    },
+    "movieExtensions": {
+        ".mp4": [
+            "Video File",
+            "video/mp4",
+            "System64/ImageRes/FileIcon_Movie.png"
+        ],
+        ".webm": [
+            "Video File",
+            "video/webm",
+            "System64/ImageRes/FileIcon_Movie.png"
+        ]
+    },
+    "imageExtensions": {
+        ".jpeg": [
+            "Image File",
+            "image/jpeg",
+            "System64/ImageRes/FileIcon_Image.png"
+        ],
+        ".jpg": [
+            "Image File",
+            "image/jpeg",
+            "System64/ImageRes/FileIcon_Image.png"
+        ],
+        ".gif": [
+            "Image File",
+            "image/gif",
+            "System64/ImageRes/FileIcon_Image.png"
+        ],
+        ".png": [
+            "Image File",
+            "image/png",
+            "System64/ImageRes/FileIcon_Image.png"
+        ],
+        ".bmp": [
+            "Image File",
+            "image/bmp",
+            "System64/ImageRes/FileIcon_Image.png"
+        ],
+        ".ico": [
+            "Image File",
+            "image/x-icon",
+            "System64/ImageRes/FileIcon_Image.png"
+        ]
+    },
+    "containerExtensions": {
+        ".ogg": [
+            "Container File",
+            "audio/ogg video/ogg",
+            "System64/ImageRes/FileIcon_Container.png"
+        ]
+    },
+    "textExtensions": {
+        ".html": [
+            "Markup File",
+            "text/html",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".css": [
+            "Style File",
+            "text/css",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".js": [
+            "Activity File",
+            "application/javascript",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".json": [
+            "Settings File",
+            "application/json",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".php": [
+            "Server Side Activity File",
+            "text/php",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".txt": [
+            "Plain Text File",
+            "text/plain",
+            "System64/ImageRes/FileIcon_Text.png"
+        ],
+        ".vtt": [
+            "Subtitle File",
+            "text/vtt",
+            "System64/ImageRes/FileIcon_Text.png"
+        ]
+    },
+    "unknownExtension": [
+        "Unknown File",
+        "application/octet-stream",
+        "System64/ImageRes/FileIcon_Unknown.png"
+    ],
+    "directory": [
+        "Directory",
+        "",
+        "System64/ImageRes/FileIcon_Directory.png"
+    ]
+}

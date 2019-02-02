@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">Live Wall</title>
+    <meta charset="UTF-8">
+
+    <base href="../">
+
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        * {
+            /* border : thin solid red !important; */
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+            font-family: 'Segoe UI Light';
+            font-size: 14px;
+            color: var(--defaultColor);
+            cursor: default;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+
+        .body {
+            height: 100%;
+            width: 100%;
+        }
+
+        @media only screen and (orientation: portrait) {
+            .areasContainer {
+                display: grid;
+                grid-template-columns: repeat(6, calc(100%/6));
+                grid-template-rows: repeat(5, 20%);
+
+                /* portraits */
+                grid-template-areas:
+                    "p1 p1 l2 l2 l2 p5"
+                    "p1 p1 s1 s1 p6 p6"
+                    "l1 l1 l1 p3 p6 p6"
+                    "p2 p2 s2 s2 s3 s3"
+                    "p2 p2 p4 l3 l3 l3"
+                ;
+
+                height: 100%;
+                width: 100%;
+            }
+
+            .zoomImage {
+                height: auto;
+                width: 96%;
+            }
+        }
+
+        @media only screen and (orientation: landscape) {
+            .areasContainer {
+                display: grid;
+                grid-template-columns: repeat(10, 10%);
+                grid-template-rows: repeat(3, calc(100% / 3));
+
+                /* Widescreens */
+                grid-template-areas:
+                    "p1 p1 l1 l1 l1 s1 s1 p2 p3 p3"
+                    "p1 p1 s2 s2 p4 p4 s3 s3 p3 p3"
+                    "p5 l2 l2 l2 p4 p4 p6 l3 l3 l3"
+                ;
+
+                height: 100%;
+                width: 100%;
+            }
+
+            .zoomImage {
+                height: 90%;
+                width: auto;
+            }
+        }
+
+        .portrait,
+        .landscape,
+        .square {
+            background-size: cover;
+            background-position: left top;
+            background-repeat: no-repeat;
+
+            transition: background-position 1s, filter 1s;
+        }
+
+        .portrait:hover,
+        .landscape:hover,
+        .square:hover {
+            background-position: center center;
+            filter: grayscale(50%);
+        }
+
+        .zoomImage {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            margin: 2%;
+
+            border: var(--buttonBorder);
+            border-width: var(--buttonBorderWidth);
+            box-shadow: 0px 0px 50px var(--panelSectorColor_activeChild);
+
+            transform: scale(0, 0);
+            transform-origin: top left;
+
+            transition: box-shadow 0.5s, transform 0.5s;
+        }
+
+        .zoomImage:hover {
+            box-shadow: 0px 0px 50px var(--panelSectorColor_hoverChild);
+        }
+
+        .imaginaryImage {
+            position: absolute;
+            top: 0;
+            right: 0;
+
+            visibility: hidden;
+
+            height: 50%;
+            width: auto;
+        }
+    </style>
+    <script>
+        //Declare and initialize globalVariables
+        let portraitCounter = 1;
+        let squareCounter = 1;
+        let landscapeCounter = 1;
+        let randomImageAddress = "";
+        let setIntervalId;
+        let extensionsDataObject = {};
+
+        function changeDirectory() {
+            //Get directoryPath from synchronizableInputSecondary
+            let directoryPath = document.getElementById("synchronizableInputSecondary").value;
+            //Check if the directoryPath starts with "User/"
+            if (directoryPath.startsWith("User/")) {
+                //Make sure the directoryPath ends with "/"
+                if (directoryPath.endsWith("/")) {
+                    directoryPath = directoryPath + "/";
+                }
+                //Remove previous setInterval
+                window.clearInterval(setIntervalId);
+                //Objectify PHP parameters
+                const parametersObject = {
+                    functionString: "getFilePathsArray();",
+                    directoryPath: directoryPath
+                };
+                //Request imageFilePathsArray
+                parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (imageFilePathsArray) {
+                    //Sort out supportedExtensions form the imageFilePathsArray
+                    const supportedImageFilePathsArray = [];
+                    for (let i = 0; i < imageFilePathsArray.length; i++) {
+                        //Get fileExtension
+                        const fileExtension = imageFilePathsArray[i].slice(imageFilePathsArray[i].lastIndexOf(".")).toLowerCase();
+                        //Check if the fileExtension is supported
+                        if (Object.keys(extensionsDataObject.imageExtensions).includes(fileExtension)) {
+                            //Add the supportedFilePath into supportedImageFilePathsArray
+                            supportedImageFilePathsArray.push(imageFilePathsArray[i]);
+                        }
+                    }
+                    //Start updating areasContainer
+                    setIntervalId = window.setInterval(updateAreas, 1000, supportedImageFilePathsArray);
+                });
+            } else {
+                window.alert("Invalid location");
+            }
+        }
+
+        function updateAreas(imageFilePathsArray) {
+            //Get imaginaryImage
+            const imaginaryImage = document.getElementById("imaginaryImage");
+            //Calculating aspect ratio for this run
+            const hwRatio = imaginaryImage.naturalHeight / imaginaryImage.naturalWidth;
+            //Determine orientation
+            let orientation;
+            if (hwRatio > 1.2) { orientation = "portrait"; }
+            else if (hwRatio < 3 / 4) { orientation = "landscape"; }
+            else { orientation = "square"; }
+            //Get a randomArea considering orientation
+            let randomAreaID;
+            if (orientation === "portrait") {
+                randomAreaID = "portrait" + portraitCounter;
+                //Increment of reset counter appropriately
+                if (portraitCounter === 6) { portraitCounter = 1; } else { portraitCounter++; }
+                //Change the backgroundImage of the randomArea to randomImage calculated buy the previous run 
+                document.getElementById(randomAreaID).style.backgroundImage = "url('" + randomImageAddress + "')";
+            } else if (orientation === "landscape") {
+                randomAreaID = "landscape" + landscapeCounter;
+                //Increment of reset counter appropriately
+                if (landscapeCounter === 3) { landscapeCounter = 1; } else { landscapeCounter++; }
+                //Change the backgroundImage of the randomArea to randomImage calculated buy the previous run
+                document.getElementById(randomAreaID).style.backgroundImage = "url('" + randomImageAddress + "')";
+            }
+            if (orientation === "square") {
+                randomAreaID = "square" + squareCounter;
+                //Increment of reset counter appropriately
+                if (squareCounter === 3) { squareCounter = 1; } else { squareCounter++; }
+                //Change the backgroundImage of the randomArea to randomImage calculated buy the previous run
+                document.getElementById(randomAreaID).style.backgroundImage = "url('" + randomImageAddress + "')";
+            }
+            //Select randomImage for next run
+            const randomImageIndex = Math.floor(Math.random() * imageFilePathsArray.length + 1);
+            randomImageAddress = imageFilePathsArray[randomImageIndex];
+            //Apply imaginaryImageSource for next run
+            imaginaryImage.src = randomImageAddress;
+        }
+
+        function showZoomImage(area) {
+            //Get zoomImage
+            const zoomImage = document.getElementById("zoomImage");
+            //Set the area's backgroundImage as zoomImage's backgroundImage
+            zoomImage.src = area.style.backgroundImage.slice(5, -2);
+            //Apply the animation to showZoomImage
+            zoomImage.style.transform = "scale(1, 1)";
+        }
+
+        function hideZoomImage(zoomImage) {
+            //Apply the animation to hideZoomImage
+            zoomImage.style.transform = "scale(0, 0)";
+        }
+
+        function initialize() {
+            //Request extensionsDataObject
+            parseHttpDataRequest("System64/Registry/ExtensionsLibrary.json", undefined, "json", function (responseObject) {
+                extensionsDataObject = responseObject;
+            });
+            //Add eventListeners to all areas
+            const areasArray = document.getElementById("areasContainer").children;
+            for (let i = 0; i < areasArray.length; i++) {
+                areasArray[i].addEventListener("click", function () { showZoomImage(this); });
+            }
+            //start updating areas from default directory
+            changeDirectory();
+        }
+    </script>
+</head>
+
+<body class="body" onload="initialize();">
+    <div id="areasContainer" class="areasContainer">
+        <div id="square1" class="square" style="grid-area: s1; background-color:red;"></div>
+        <div id="square2" class="square" style="grid-area: s2; background-color:orange;"></div>
+        <div id="square3" class="square" style="grid-area: s3; background-color:yellow;"></div>
+
+        <div id="landscape1" class="landscape" style="grid-area: l1; background-color:green;"></div>
+        <div id="landscape2" class="landscape" style="grid-area: l2; background-color:blue;"></div>
+        <div id="landscape3" class="landscape" style="grid-area: l3; background-color:indigo;"></div>
+
+        <div id="portrait1" class="portrait" style="grid-area: p1; background-color:violet;"></div>
+        <div id="portrait2" class="portrait" style="grid-area: p2; background-color:salmon;"></div>
+        <div id="portrait3" class="portrait" style="grid-area: p3; background-color:cyan;"></div>
+        <div id="portrait4" class="portrait" style="grid-area: p4; background-color:gray;"></div>
+        <div id="portrait5" class="portrait" style="grid-area: p5; background-color:hotpink;"></div>
+        <div id="portrait6" class="portrait" style="grid-area: p6; background-color: yellowgreen;"></div>
+    </div>
+
+    <img id="imaginaryImage" class="imaginaryImage" />
+    <img id="zoomImage" class="zoomImage" draggable="false" onclick="hideZoomImage(this);" />
+    <input id="synchronizableInputSecondary" style="visibility: hidden" type="text" value="User/Images/" />
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display:none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar" style="width: 350px;">
+            <input id="synchronizableInputPrimary" type="text" placeholder="Path for an image directory..." value="User/Images/"
+                onkeyup="parseOuterScript('synchronizeInput');" />
+        </div>
+        <div class="startButton" onclick="parseInnerScript('changeDirectory');">
+            <span>Change</span>
+        </div>
+        <div class="quickAccessBar" style="width: 350px;">
+            <span onclick="
+                document.getElementById('dataCarrier').dataset.height = '500px';
+                document.getElementById('dataCarrier').dataset.width = '1250px';
+                parseOuterScript('setIFrameDimensions');">Landscape</span>
+            <span onclick="
+                document.getElementById('dataCarrier').dataset.height = '600px';
+                document.getElementById('dataCarrier').dataset.width = '500px';
+                parseOuterScript('setIFrameDimensions');">Portrait</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

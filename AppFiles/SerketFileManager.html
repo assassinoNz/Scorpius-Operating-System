@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" style="height:100%;width:100%;padding:0;overflow: hidden;">
+
+<head>
+    <title id="title">File Manager</title>
+    <meta charset="UTF-8">
+
+    <base href="../">
+
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_StyleVariables.css">
+    <link rel="stylesheet" href="AppFiles/AppStyleSheets/SerketAppPlatform_Styles.css">
+
+    <script src="AppFiles/AppScripts/SerketAppPlatform_FunctionsLibrary.js"></script>
+
+    <style>
+        .body {
+            grid-template-areas:
+                "sidebar pane pane pane pane pane panel panel panel panel panel panel panel panel panel panel panel panel panel controls"
+            ;
+        }
+    </style>
+
+    <script>
+        //Declare and initialize variables
+        let presentWorkingDirectory = "User/";
+        let selectedSector = null;
+        let thumbnailsView = false;
+        const invalidCharactersArray = ['\\', '/', ':', '*', '?', '"', '<', '>', '|'];
+        let extensionsDataObject = {};
+        function scanDirectoryFromString() {
+            //Get directoryString
+            const directoryString = document.getElementById("navigationStringInput").value;
+            //Check if the directoryString starts with "User/"
+            if (directoryString.startsWith("User/")) {
+                //Make sure the directoryString ends with "/"
+                if (directoryString.endsWith("/")) {
+                    presentWorkingDirectory = directoryString;
+                } else {
+                    presentWorkingDirectory = directoryString + "/";
+                }
+                //Now scan the presentWorkingDirectory
+                scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            } else {
+                window.alert("Scanning non-user locations are restricted");
+            }
+        }
+
+        function scanDirectory(directoryPath, outputPanel) {
+            //Deselect any selectedSectors
+            selectSector(null);
+            //Remove previous panelSections
+            outputPanel.innerHTML = "";
+            //Update presentWorkingDirectoryDisplay
+            document.getElementById("presentWorkingDirectoryDisplay").innerHTML = presentWorkingDirectory;
+            //Objectify PHP parameters
+            const parametersObject = {
+                functionString: "getDirectoryPathsArray();",
+                directoryPath: directoryPath
+            };
+            //Create sectors for directories
+            parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (directoryPathsArray) {
+                //Create a panelSector for each directory if there are any
+                if (directoryPathsArray.length !== 0) {
+                    for (let i = 0; i < directoryPathsArray.length; i++) {
+                        //panelSector creation
+                        const panelSector = document.createElement("div");
+                        panelSector.id = directoryPathsArray[i];
+                        panelSector.setAttribute("class", "panelAreaDivisionSector");
+                        //Add eventListener for single-click selection
+                        panelSector.addEventListener("click", function () { selectSector(this); });
+                        //Add eventListener for double-click open directory
+                        panelSector.addEventListener("dblclick", function () {
+                            presentWorkingDirectory = this.id + "/";
+                            scanDirectory(presentWorkingDirectory, outputPanel);
+                        });
+                        //Add thumbnails if the thumbnailView is enabled
+                        if (thumbnailsView === true) {
+                            //Apply thumbnail styles to panelSector
+                            panelSector.classList.add("panelAreaDivisionSector-thumbnail");
+                            //Thumbnail creation
+                            const thumbnail = document.createElement("div");
+                            thumbnail.setAttribute("class", "thumbnail");
+                            thumbnail.style.backgroundImage = `url("${extensionsDataObject.directory[2]}")`;
+                            //Append elements into HTML
+                            panelSector.appendChild(thumbnail);
+                        }
+                        //panelSectorTitle creation
+                        const panelSectorTitle = document.createElement("h1");
+                        panelSectorTitle.setAttribute("class", "title");
+                        panelSectorTitle.innerHTML = directoryPathsArray[i].slice(directoryPathsArray[i].lastIndexOf("/") + 1);
+                        //panelSectorType creation
+                        const panelSectorType = document.createElement("p");
+                        panelSectorType.setAttribute("class", "information");
+                        panelSectorType.innerHTML = extensionsDataObject.directory[0];
+                        //Append elements into HTML
+                        panelSector.appendChild(panelSectorTitle);
+                        panelSector.appendChild(panelSectorType);
+                        outputPanel.appendChild(panelSector);
+                    }
+                }
+            });
+            //Objectify PHP parameters (reusing parametersObject)
+            parametersObject.functionString = "getFilePathsArray();"
+            //Creates sectors for files
+            parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (filePathsArray) {
+                //Create a panelSector for each file if there are any
+                if (filePathsArray.length !== 0) {
+                    for (let i = 0; i < filePathsArray.length; i++) {
+                        //panelSector creation
+                        const panelSector = document.createElement("div");
+                        panelSector.id = filePathsArray[i];
+                        panelSector.setAttribute("class", "panelAreaDivisionSector");
+                        panelSector.addEventListener("click", function () { selectSector(this); });
+                        //Get the fileExtension
+                        const fileExtension = filePathsArray[i].slice(filePathsArray[i].lastIndexOf(".")).toLowerCase();
+                        //Add thumbnails if the thumbnailView is enabled
+                        if (thumbnailsView === true) {
+                            //Apply thumbnail styles to panelSector
+                            panelSector.classList.add("panelAreaDivisionSector-thumbnail");
+                            //Thumbnail creation
+                            const thumbnail = document.createElement("div");
+                            thumbnail.setAttribute("class", "thumbnail");
+                            //Style thumbnail according to the fileExtension
+                            if (Object.keys(extensionsDataObject.imageExtensions).includes(fileExtension)) {
+                                //Make the thumbnail to an imagePreview
+                                thumbnail.classList.add("thumbnail-preview");
+                                thumbnail.style.backgroundImage = `url("${filePathsArray[i]}")`;
+                            } else if (Object.keys(extensionsDataObject.audioExtensions).includes(fileExtension)) {
+                                thumbnail.style.backgroundImage = `url("${extensionsDataObject.audioExtensions[fileExtension][2]}")`;
+                            } else if (Object.keys(extensionsDataObject.movieExtensions).includes(fileExtension)) {
+                                thumbnail.style.backgroundImage = `url("${extensionsDataObject.movieExtensions[fileExtension][2]}")`;
+                            } else if (Object.keys(extensionsDataObject.containerExtensions).includes(fileExtension)) {
+                                thumbnail.style.backgroundImage = `url("${extensionsDataObject.containerExtensions[fileExtension][2]}")`;
+                            } else if (Object.keys(extensionsDataObject.textExtensions).includes(fileExtension)) {
+                                thumbnail.style.backgroundImage = `url("${extensionsDataObject.textExtensions[fileExtension][2]}")`;
+                            } else {
+                                thumbnail.style.backgroundImage = `url("${extensionsDataObject.unknownExtension[2]}")`;
+                            }
+                            //Append elements into HTML
+                            panelSector.appendChild(thumbnail);
+                        }
+                        //panelSectorTitle creation
+                        const panelSectorTitle = document.createElement("h1");
+                        panelSectorTitle.setAttribute("class", "title");
+                        panelSectorTitle.innerHTML = filePathsArray[i].slice(filePathsArray[i].lastIndexOf("/") + 1, filePathsArray[i].lastIndexOf("."));
+                        //panelSectorType creation
+                        const panelSectorType = document.createElement("p");
+                        panelSectorType.setAttribute("class", "information");
+                        //Determine type according to the fileExtension and add preview handler
+                        if (Object.keys(extensionsDataObject.imageExtensions).includes(fileExtension)) {
+                            panelSectorType.innerHTML = extensionsDataObject.imageExtensions[fileExtension][0];
+                            panelSector.addEventListener("dblclick", function () {
+                                previewFile("image", this.id);
+                            });
+                        } else if (Object.keys(extensionsDataObject.audioExtensions).includes(fileExtension)) {
+                            panelSectorType.innerHTML = extensionsDataObject.audioExtensions[fileExtension][0];
+                            panelSector.addEventListener("dblclick", function () {
+                                previewFile("audio", this.id);
+                            });
+                        } else if (Object.keys(extensionsDataObject.movieExtensions).includes(fileExtension)) {
+                            panelSectorType.innerHTML = extensionsDataObject.movieExtensions[fileExtension][0];
+                            panelSector.addEventListener("dblclick", function () {
+                                previewFile("movie", this.id);
+                            });
+                        } else if (Object.keys(extensionsDataObject.containerExtensions).includes(fileExtension)) {
+                            panelSectorType.innerHTML = extensionsDataObject.containerExtensions[fileExtension][0];
+                            panelSector.addEventListener("dblclick", function () {
+                                previewFile("container", this.id);
+                            });
+                        } else if (Object.keys(extensionsDataObject.textExtensions).includes(fileExtension)) {
+                            panelSectorType.innerHTML = extensionsDataObject.textExtensions[fileExtension][0];
+                            panelSector.addEventListener("dblclick", function () {
+                                previewFile("text", this.id);
+                            });
+                        } else {
+                            panelSectorType.innerHTML = extensionsDataObject.unknownExtension[0];
+                        }
+                        //Append elements into HTML
+                        panelSector.appendChild(panelSectorTitle);
+                        panelSector.appendChild(panelSectorType);
+                        outputPanel.appendChild(panelSector);
+                    }
+                }
+            });
+        }
+
+        function previewFile(fileType, filePath) {
+            //filePath should be modified to go backwards from "shellComponentFiles" to "root"
+            filePath = "../../" + filePath;
+            //Create or change the src of the previewBox according to the fileType
+            if (fileType === "image") {
+                const previewBox = parent.document.getElementById("imagePreviewBox");
+                if (previewBox === null) {
+                    createPreviewBox("image", filePath, "System64/ShellComponentFiles/MiniImageViewer.html", "400px", "400px");
+                } else {
+                    previewBox.children[0].contentDocument.getElementById("mediaController").src = filePath;
+                    previewBox.children[0].style.height = "400px";
+                    previewBox.children[0].style.width = "400px";
+                }
+            } else if (fileType === "audio") {
+                const previewBox = parent.document.getElementById("containerPreviewBox");
+                if (previewBox === null) {
+                    createPreviewBox("container", filePath, "System64/ShellComponentFiles/MiniPlayer.html", "320px", "320px");
+                } else {
+                    previewBox.children[0].contentDocument.getElementById("mediaController").src = filePath;
+                    previewBox.children[0].style.height = "320px";
+                    previewBox.children[0].style.width = "320px";
+                }
+            } else if (fileType === "movie" || fileType === "container") {
+                const previewBox = parent.document.getElementById("containerPreviewBox");
+                if (previewBox === null) {
+                    createPreviewBox("container", filePath, "System64/ShellComponentFiles/MiniPlayer.html", "500px", "900px");
+                } else {
+                    previewBox.children[0].contentDocument.getElementById("mediaController").src = filePath;
+                    previewBox.children[0].style.height = "500px";
+                    previewBox.children[0].style.width = "900px";
+                }
+            } else if (fileType === "text") {
+                // var previewBox = parent.document.getElementById("moviePreviewBox");
+                // if (previewBox === null) {
+                //     //createPreviewBox("System64/ShellComponentFiles/MiniPlayer.html", filePath);
+                // } else {
+                //     previewBox.children[0].contentDocument.getElementById("mediaController").src = filePath;
+                // }
+            }
+        }
+
+        function createPreviewBox(fileType, filePath, appPath, appHeight, appWidth) {
+            //Preview creation
+            const previewBox = document.createElement("div");
+            previewBox.setAttribute("class", "window window-active");
+            previewBox.id = fileType + "PreviewBox";
+            //Make the previewBox always on top
+            previewBox.style.zIndex = String(10);
+            //Add eventListeners for startDragWindow
+            previewBox.addEventListener("mousedown", function (eventDetails) {
+                parent.startDragWindow(eventDetails, this);
+            });
+            //iframe creation
+            const iFrame = document.createElement("iframe");
+            iFrame.setAttribute("class", "iFrame");
+            iFrame.style.height = appHeight;
+            iFrame.style.width = appWidth;
+            iFrame.src = appPath;
+            //Add eventListener for the purpose of loading media initially
+            iFrame.addEventListener("load", function () {
+                this.contentDocument.getElementById("mediaController").src = filePath;
+            });
+            //Append elements into HTML
+            previewBox.appendChild(iFrame);
+            parent.document.getElementById("body").appendChild(previewBox);
+        }
+
+        function selectSector(sectorToSelect) {
+            //Check if any sector is selected
+            if (selectedSector !== null) {
+                //Deselect selectedSector
+                selectedSector.classList.remove("panelAreaDivisionSector-active");
+            }
+            //Check if there is any sectorToSelect
+            if (sectorToSelect !== null) {
+                //Select sectorToSelect
+                sectorToSelect.classList.add("panelAreaDivisionSector-active");
+                //Get info of selectedSelector;
+                document.getElementById("fileNameDisplay").innerHTML = sectorToSelect.id;
+                document.getElementById("fileSizeDisplay").innerHTML = "(Feature Coming Soon)";
+            } else {
+                document.getElementById("fileNameDisplay").innerHTML = "(No file/directory selected)";
+            }
+            //Update selectedSector
+            selectedSector = sectorToSelect;
+        }
+
+        function scanClipboard() {
+            //Get the clipboardPane
+            const clipboardPane = document.getElementById("clipboardPane");
+            //Remove previous paneSections
+            clipboardPane.innerHTML = "";
+            //Objectify PHP parameters
+            const parametersObject = {
+                functionString: "getContentPathsArray();",
+                directoryPath: "System64/Clipboard/"
+            };
+            //Create sectors for directories
+            parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (contentPathsArray) {
+                //Create a paneSector for each directory if there is any
+                if (contentPathsArray.length !== 0) {
+                    for (let i = 0; i < contentPathsArray.length; i++) {
+                        //paneSector creation
+                        const paneSector = document.createElement("div");
+                        paneSector.id = contentPathsArray[i];
+                        paneSector.setAttribute("class", "paneAreaDivisionSector");
+                        //paneSectorTitle creation
+                        const paneSectorTitle = document.createElement("h1");
+                        paneSectorTitle.setAttribute("class", "title");
+                        //paneSectorType creation
+                        const paneSectorType = document.createElement("p");
+                        paneSectorType.setAttribute("class", "information");
+                        //Change information considering if a file or directory
+                        //NOTE: DIRECTORIES HAVE "\" AT THE END
+                        if (contentPathsArray[i].endsWith("\\")) {
+                            paneSectorTitle.innerHTML = contentPathsArray[i].slice(contentPathsArray[i].lastIndexOf("/") + 1, contentPathsArray[i].indexOf("\\"));
+                            paneSectorType.innerHTML = extensionsDataObject.directory[0];
+                        } else {
+                            paneSectorTitle.innerHTML = contentPathsArray[i].slice(contentPathsArray[i].lastIndexOf("/") + 1);
+                            //Get the fileExtension
+                            const fileExtension = contentPathsArray[i].slice(contentPathsArray[i].lastIndexOf(".")).toLowerCase();
+                            //Set paneSectorType's text according to fileExtension
+                            if (Object.keys(extensionsDataObject.imageExtensions).includes(fileExtension)) {
+                                paneSectorType.innerHTML = extensionsDataObject.imageExtensions[fileExtension][0];
+                            } else if (Object.keys(extensionsDataObject.audioExtensions).includes(fileExtension)) {
+                                paneSectorType.innerHTML = extensionsDataObject.audioExtensions[fileExtension][0];
+                            } else if (Object.keys(extensionsDataObject.movieExtensions).includes(fileExtension)) {
+                                paneSectorType.innerHTML = extensionsDataObject.movieExtensions[fileExtension][0];
+                            } else if (Object.keys(extensionsDataObject.containerExtensions).includes(fileExtension)) {
+                                paneSectorType.innerHTML = extensionsDataObject.containerExtensions[fileExtension][0];
+                            } else if (Object.keys(extensionsDataObject.textExtensions).includes(fileExtension)) {
+                                paneSectorType.innerHTML = extensionsDataObject.textExtensions[fileExtension][0];
+                            } else {
+                                paneSectorType.innerHTML = extensionsDataObject.unknownExtension[0];
+                            }
+                        }
+                        //paneSectorLink1 creation
+                        const paneSectorLink1 = document.createElement("span");
+                        paneSectorLink1.setAttribute("class", "linkButton");
+                        paneSectorLink1.innerHTML = "Remove From Clipboard";
+                        //Add eventListener for remove item from clipboard
+                        paneSectorLink1.addEventListener("click", function () {
+                            removeFromClipboard(this.parentElement.id);
+                        });
+                        //paneSectorLink2 creation
+                        const paneSectorLink2 = document.createElement("span");
+                        paneSectorLink2.setAttribute("class", "linkButton");
+                        paneSectorLink2.innerHTML = "Paste";
+                        //Add eventListener for paste item to presentWorkingDirectory
+                        paneSectorLink2.addEventListener("click", function () {
+                            copyFromClipboard(this.parentElement.id);
+                        });
+                        //Append elements into HTML
+                        paneSector.appendChild(paneSectorTitle);
+                        paneSector.appendChild(paneSectorType);
+                        paneSector.appendChild(paneSectorLink1);
+                        paneSector.appendChild(paneSectorLink2);
+                        clipboardPane.appendChild(paneSector);
+                    }
+                }
+            });
+        }
+
+        function navigateParentDirectory() {
+            //Check if there are any user-navigable directories
+            if (presentWorkingDirectory === "User/") {
+                window.alert("No further navigable parent directories");
+            } else {
+                //Remove last "/" from the presentWorkingDirectory for lastIndexOf method to work
+                presentWorkingDirectory = presentWorkingDirectory.slice(0, -1);
+                //Remove last directory from presentWorkingDirectory
+                presentWorkingDirectory = presentWorkingDirectory.substr(0, presentWorkingDirectory.lastIndexOf("/") + 1);
+                //Now scan the presentWorkingDirectory
+                scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            }
+        }
+
+        function searchDirectory() {
+            //Get the searchString
+            const searchString = document.getElementById("synchronizableInputSecondary").value;
+            //Make sure that presentWorkingDirectory is not on a searchResultsDirectory
+            if (presentWorkingDirectory.includes("*")) {
+                presentWorkingDirectory = presentWorkingDirectory.substr(0, presentWorkingDirectory.lastIndexOf("/") + 1);
+            }
+            //Make presentWorkingDirectory into a searchResultsDirectory
+            presentWorkingDirectory = presentWorkingDirectory + "*" + searchString;
+            //Now scan the presentWorkingDirectory
+            scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+        }
+
+        function createDirectory() {
+            //Get the name for the directory via promptBox
+            const directoryName = window.prompt("Give an identifier for the directory");
+            //Declare and initialize invalidCharacterCheck
+            let invalidCharacterCheck = true;
+            //Check if the user has given a directoryName
+            if (directoryName !== null) {
+                //Check for invalidCharacters
+                for (let i = 0; i < invalidCharactersArray.length; i++) {
+                    if (directoryName.includes(invalidCharactersArray[i])) {
+                        invalidCharacterCheck = false;
+                    }
+                }
+                //Continue only if the invalidCharacterCheck is true
+                if (invalidCharacterCheck === false) {
+                    window.alert("A directory name cannot contain any of the following characters.\n" + '\\ / : * ? " < > |');
+                } else {
+                    //Check if the presentWorkingDirectory is a searchResultsDirectory
+                    if (presentWorkingDirectory.endsWith("/")) {
+                        //Objectify PHP parameters
+                        const parametersObject = {
+                            functionString: "createDirectory();",
+                            directoryPath: `${presentWorkingDirectory}${directoryName}`
+                        };
+                        //Create directory with the given name
+                        parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                            //Scan the presentWorkingDirectory after creating the newDirectory
+                            scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+                        });
+                    } else {
+                        window.alert("Cannot create a directory from within a search results panel");
+                    }
+                }
+            }
+        }
+
+        function removeFileDirectory() {
+            //Check if a sector is selected
+            if (selectedSector === null) {
+                window.alert("No file/directory selected");
+            } else {
+                //Get confirmation from the user
+                const confirmation = window.confirm(`Are you sure to remove ${selectedSector.id} from its location permanently?`);
+                //Check if the confirmation is true
+                if (confirmation === true) {
+                    //Objectify PHP parameters
+                    const parametersObject = {
+                        functionString: "removeFileDirectory();",
+                        itemPath: selectedSector.id
+                    };
+                    //Remove file/directory
+                    parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                        //Scan the presentWorkingDirectory after deletion
+                        scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+                    });
+                }
+            }
+        }
+
+        function removeFromClipboard(clipboardSectorID) {
+            //Objectify PHP parameters
+            const parametersObject = {
+                functionString: "removeFileDirectory();",
+                itemPath: clipboardSectorID
+            };
+            //Remove item from clipboard
+            parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                //Update clipboardPane
+                scanClipboard();
+            });
+        }
+
+        function copyToClipboard() {
+            //Check if a sector is selected
+            if (selectedSector === null) {
+                window.alert("No file/directory selected");
+            } else {
+                //Objectify PHP parameters
+                const parametersObject = {
+                    functionString: "copyFileDirectoryTo();",
+                    itemPath: selectedSector.id,
+                    newDirectoryPath: "System64/Clipboard"
+                };
+                //Copy item to clipboard
+                parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                    //Update clipboardPane
+                    scanClipboard();
+                });
+            }
+        }
+
+        function moveToClipboard() {
+            //Check if a sector is selected
+            if (selectedSector === null) {
+                window.alert("No file/directory selected");
+            } else {
+                //Objectify PHP parameters
+                const parametersObject = {
+                    functionString: "moveFileDirectoryTo();",
+                    itemPath: selectedSector.id,
+                    newDirectoryPath: "System64/Clipboard/"
+                };
+                //Move item to clipboard
+                parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                    //Scan the presentWorkingDirectory after moving
+                    scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+                    //Update clipboardPane
+                    scanClipboard();
+                });
+            }
+        }
+
+        function copyFromClipboard(clipboardSectorID) {
+            //Check if the presentWorkingDirectory is a searchResultsDirectory
+            if (presentWorkingDirectory.endsWith("/")) {
+                //Objectify PHP parameters
+                const parametersObject = {
+                    functionString: "copyFileDirectoryTo();",
+                    itemPath: clipboardSectorID,
+                    newDirectoryPath: presentWorkingDirectory.slice(0, presentWorkingDirectory.length - 1)
+                };
+                //Copy item from clipboard to presentWorkingDirectory
+                parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                    //Scan the presentWorkingDirectory after pasting
+                    scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+                });
+            } else {
+                window.alert("Cannot paste to a search results panel");
+            }
+        }
+
+        function clearClipboard() {
+            //Remove clipboardDirectory
+            //Objectify PHP parameters
+            const parametersObject = {
+                functionString: "removeFileDirectory();",
+                itemPath: "System64/Clipboard"
+            };
+            parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                //Objectify PHP parameters
+                parametersObject.functionString = "createDirectory();";
+                //Recreate clipboardDirectory
+                parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                    //Update clipboardPane
+                    scanClipboard();
+                });
+            });
+        }
+
+        function renameFileDirectory() {
+            //Check if a sector is selected
+            if (selectedSector === null) {
+                window.alert("No file/directory selected");
+            } else {
+                //Get the newName for the file/directory via promptBox
+                const newName = window.prompt("What would be the new identifier of the file/directory?");
+                //Declare and initialize invalidCharacterCheck
+                let invalidCharacterCheck = true;
+                //Check if the user has given a newName
+                if (newName !== null) {
+                    //Check for invalidCharacters
+                    for (let i = 0; i < invalidCharactersArray.length; i++) {
+                        if (newName.includes(invalidCharactersArray[i])) {
+                            invalidCharacterCheck = false;
+                        }
+                    }
+                    //Check if the invalidCharacterCheck is true
+                    if (invalidCharacterCheck === false) {
+                        window.alert("A file or directory name cannot contain any of the following characters.\n" + '\\ / : * ? " < > |');
+                    } else {
+                        //Objectify PHP parameters
+                        const parametersObject = {
+                            functionString: "renameFileDirectory();",
+                            itemPath: selectedSector.id,
+                            newName: newName
+                        };
+                        //Rename file/directory
+                        parseHttpTaskRequest('FileSystem.php', parametersObject, function () {
+                            //Scan the presentWorkingDirectory after renaming
+                            scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+                        });
+                    }
+                }
+            }
+        }
+
+        //INFO: POSSIBLE UNIFICATION
+        function onOffThumbnailsView() {
+            //Get the relevant checkbox status
+            const checkbox = document.getElementById("thumbnailsView");
+            //Apply changes according to the checkbox status
+            if (checkbox.checked) {
+                thumbnailsView = true;
+                //Apply changes immediately
+                scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            } else {
+                thumbnailsView = false;
+                //Apply changes immediately
+                scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            }
+        }
+
+        function initialize() {
+            //Request extensionsDataObject
+            parseHttpDataRequest("System64/Registry/ExtensionsLibrary.json", undefined, "json", function (responseObject) {
+                extensionsDataObject = responseObject;
+            });
+            //Navigate to "User/" directory at the beginning
+            scanDirectory(presentWorkingDirectory, document.getElementById("contentPanel"));
+            //Update clipboardPane
+            scanClipboard();
+        }
+    </script>
+</head>
+
+<body class="body" onload="initialize();">
+    <!-- sidebarArea -->
+    <div id="sidebarArea" class="sidebarArea">
+        <div class="sidebarAreaDivision sidebarAreaDivision-active" onclick="switchPane('homePane', this);"><span class="label">HOME</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('detailsPane', this);"><span class="label">DETAILS</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('clipboardPane', this);"><span class="label">CLIPBOARD</span></div>
+        <div class="sidebarAreaDivision" onclick="switchPane('settingsPane', this);"><span class="label">SETTINGS</span></div>
+    </div>
+    <!-- paneArea -->
+    <div id="paneArea" class="paneArea">
+        <div id="homePane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Search</h1>
+                <input id="synchronizableInputSecondary" type="type" class="textInput" placeholder="Search..." />
+                <button class="button" onclick="searchDirectory();"><span class="label">START SEARCH</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Navigate To Directory</h1>
+                <input id="navigationStringInput" type="type" placeholder="Path for a directory..." class="textInput"
+                    value="User/" />
+                <button class="button" onclick="scanDirectoryFromString();"><span class="label">NAVIGATE</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Create</h1>
+                <button class="button" onclick="createDirectory();"><span class="label">NEW DIRECTORY</span></button>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Remove</h1>
+                <button class="button" onclick="removeFileDirectory();"><span class="label">DELETE</span></button>
+            </div>
+        </div>
+        <div id="detailsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Location</h1>
+                <p id="presentWorkingDirectoryDisplay" class="information">User/</p>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Full Qualified Name</h1>
+                <p id="fileNameDisplay" class="information"></p>
+            </div>
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Size On Disk</h1>
+                <p id="fileSizeDisplay" class="information"></p>
+            </div>
+        </div>
+        <div id="clipboardPane" class="paneAreaDivision">
+            <!-- Clipboard content goes here -->
+        </div>
+        <div id="settingsPane" class="paneAreaDivision">
+            <div class="paneAreaDivisionSector">
+                <h1 class="title">Thumbnails View <input id="thumbnailsView" type="checkbox" class="checkboxInput"
+                        onclick="onOffThumbnailsView();" /></h1>
+                <p class="definition">Turn this on to enable thumbnails view which also enables image previews in
+                    thumbnails</p>
+            </div>
+        </div>
+    </div>
+    <!-- panelArea -->
+    <div id="panelArea" class="panelArea">
+        <div id="contentPanel" class="panelAreaDivision">
+            <div class="panelAreaDivisionSector">
+
+            </div>
+        </div>
+    </div>
+    <!-- controlsArea -->
+    <div id="controlsArea" class="controlsArea">
+        <div class="controlsAreaDivision" onclick="moveToClipboard();"><span class="label">CUT</span></div>
+        <div class="controlsAreaDivision" onclick="copyToClipboard();"><span class="label">COPY</span></div>
+        <div class="controlsAreaDivision" onclick="createDirectory();"><span class="label">NEW DIR</span></div>
+        <div class="controlsAreaDivision" onclick="renameFileDirectory();"><span class="label">RENAME</span></div>
+        <div class="controlsAreaDivision" onclick="removeFileDirectory();"><span class="label">DELETE</span></div>
+    </div>
+
+    <!-- Content of the quickAccessArea -->
+    <div id="quickAccessArea" class="quickAccessArea" style="display: none;">
+        <span id="dataCarrier" data-window-index="" data-height="500px" data-width="1250px" data-resizable="false"></span>
+        <div class="quickAccessBar" style="width: 300px;">
+            <input id="synchronizableInputPrimary" type="text" placeholder="Search..." onkeyup="parseOuterScript('synchronizeInput');" />
+        </div>
+        <div class="startButton" onclick="parseInnerScript('searchDirectory');">
+            <span>Search</span>
+        </div>
+        <div class="quickAccessBar" style="width: 300px;">
+            <span onclick="parseInnerScript('clearClipboard');">Clear Clipboard</span>
+            <span onclick="parseInnerScript('navigateParentDirectory');">Back</span>
+            <span onclick="parseInnerScript('refreshWindow');">Refresh</span>
+            <span onclick="
+            var imagePreviewBox = document.getElementById('imagePreviewBox');
+            var containerPreviewBox = document.getElementById('containerPreviewBox');
+            if (imagePreviewBox !== null) {
+                imagePreviewBox.remove();
+            }
+            if (containerPreviewBox !== null) {
+                containerPreviewBox.remove();
+            }
+            parseOuterScript('closeWindow');">Close</span>
+        </div>
+    </div>
+</body>
+
+</html>

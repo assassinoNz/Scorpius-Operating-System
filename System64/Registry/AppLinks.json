@@ -1,0 +1,34 @@
+{
+    "Character Input": [
+        "AppFiles/CharacterInput.html",
+        "AppFiles/ImageRes/CharacterInput_Icon.png"
+    ],
+    "Code": [
+        "AppFiles/Code.html",
+        "AppFiles/ImageRes/Code_Icon.png"
+    ],
+    "Compass": [
+        "AppFiles/Compass.html",
+        "AppFiles/ImageRes/Compass_Icon.png"
+    ],
+    "Live Wall": [
+        "AppFiles/LiveWall.html",
+        "AppFiles/ImageRes/LiveWall_Icon.png"
+    ],
+    "Motion": [
+        "AppFiles/Motion.html",
+        "AppFiles/ImageRes/Motion_Icon.png"
+    ],
+    "Musix+Movies": [
+        "AppFiles/Musix+Movies.html",
+        "AppFiles/ImageRes/Musix+Movies_Icon.png"
+    ],
+    "Serket File Manager": [
+        "AppFiles/SerketFileManager.html",
+        "AppFiles/ImageRes/SerketFileManager_Icon.png"
+    ],
+    "Settings": [
+        "AppFiles/Settings.html",
+        "AppFiles/ImageRes/Settings_Icon.png"
+    ]
+}

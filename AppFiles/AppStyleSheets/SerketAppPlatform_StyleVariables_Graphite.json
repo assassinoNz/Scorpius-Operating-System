@@ -1,0 +1,167 @@
+{
+    "--defaultColor": [
+        "Default Font Color",
+        "When idle",
+        "rgba(255, 255, 255, 1)"
+    ],
+    "--sidebarAreaBackgroundColor": [
+        "Sidebar Area Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.5)"
+    ],
+    "--sidebarDivisionBackgroundColor": [
+        "Sidebar Area Division Background Color",
+        "When idle",
+        ""
+    ],
+    "--sidebarDivisionBackgroundColor_active": [
+        "Sidebar Area Division Background Color",
+        "When active",
+        "rgba(100, 100, 100, 0.8)"
+    ],
+    "--sidebarDivisionBackgroundColor_hover": [
+        "Sidebar Area Division Background Color",
+        "On hover",
+        "rgba(100, 100, 100, 0.8)"
+    ],
+    "--paneAreaBackgroundColor": [
+        "Pane Area Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.5)"
+    ],
+    "--paneDivisionBackgroundColor": [
+        "Pane Area Division Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.8)"
+    ],
+    "--paneSectorColor-activeChild": [
+        "Pane Area Division Sector Content Text Font Color",
+        "When active",
+        "rgba(0, 0, 0, 1)"
+    ],
+    "--paneSectorBorder-activeChild": [
+        "Pane Area Division Sector Content Text Border Style",
+        "When active",
+        "solid rgba(0, 0, 0, 1)"
+    ],
+    "--paneSectorBorderWidth-activeChild": [
+        "Pane Area Division Sector Content Text Border Width",
+        "When active",
+        "0 10px 0 0"
+    ],
+    "--paneSectorColor_hoverChild": [
+        "Pane Area Division Sector Content Text Font Color",
+        "On hover",
+        "yellowgreen"
+    ],
+    "--panelAreaBackgroundColor": [
+        "Panel Area Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.5)"
+    ],
+    "--panelDivisionBackgroundColor": [
+        "Panel Area Division Background Color",
+        "When idle",
+        "rgba(40, 40, 40, 1)"
+    ],
+    "--panelSectorColor_hoverChild": [
+        "Panel Area Division Sector Content Text Font Color",
+        "On hover",
+        "rgba(255, 255, 255, 1)"
+    ],
+    "--panelSectorBorder_hoverChild": [
+        "Panel Area Division Sector Content Text Border Style",
+        "On hover",
+        "solid rgba(255, 255, 255, 1)"
+    ],
+    "--panelSectorBorderWidth_hoverChild": [
+        "Panel Area Division Sector Content Text Border Width",
+        "On hover",
+        "0 0 0 10px"
+    ],
+    "--panelSectorColor_activeChild": [
+        "Panel Area Division Sector Content Text Font Color",
+        "When active",
+        "yellowgreen"
+    ],
+    "--panelSectorBorder_activeChild": [
+        "Panel Area Division Sector Content Text Border Style",
+        "When active",
+        "solid yellowgreen"
+    ],
+    "--panelSectorBorderWidth_activeChild": [
+        "Panel Area Division Sector Border Content Text Width",
+        "When active",
+        "0 0 0 10px"
+    ],
+    "--infoAreaBackgroundColor": [
+        "Info Area Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.5)"
+    ],
+    "--infoDivisionBackgroundColor": [
+        "Info Area Division Background Color",
+        "When idle",
+        "rgba(40, 40, 40, 1)"
+    ],
+    "--controlsAreaBackgroundColor": [
+        "Controls Area Background Color",
+        "When idle",
+        "rgba(100, 100, 100, 0.5)"
+    ],
+    "--controlsDivisionBackgroundColor": [
+        "Controls Division Background Color",
+        "When idle",
+        ""
+    ],
+    "--controlsDivisionBackgroundColor_hover": [
+        "Controls Division Background Color",
+        "On hover",
+        "rgba(100, 100, 100, 0.8)"
+    ],
+    "--outputColor": [
+        "Output Text Font Color",
+        "When idle",
+        "yellowgreen"
+    ],
+    "--buttonBackgroundColor": [
+        "Button Background Color",
+        "When idle",
+        ""
+    ],
+    "--buttonBackgroundColor_hover": [
+        "Button Background Color",
+        "On hover",
+        "rgba(40, 40, 40, 1)"
+    ],
+    "--buttonBorder": [
+        "Button Border Style",
+        "When idle",
+        "solid rgba(255, 255, 255, 1)"
+    ],
+    "--buttonBorderWidth": [
+        "Button Border Width",
+        "When idle",
+        "thin"
+    ],
+    "--linkButtonColor_hover": [
+        "Link Button Font Color",
+        "On hover",
+        "rgba(40, 40, 40, 1)"
+    ],
+    "--textInputBackgroundColor": [
+        "Text Input Background Color",
+        "When idle",
+        ""
+    ],
+    "--textInputBorder": [
+        "Text Input Border Style",
+        "When idle",
+        "solid rgba(255, 255, 255, 1)"
+    ],
+    "--textInputBorderWidth": [
+        "Text Input Border Width",
+        "When idle",
+        "0 0 thin 0"
+    ]
+}

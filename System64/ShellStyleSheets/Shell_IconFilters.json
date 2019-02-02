@@ -1,0 +1,47 @@
+{
+    "--blur": [
+        "Blur",
+        "blur(%)",
+        "rgba(255, 255, 255, 1)"
+    ],
+    "--brightness": [
+        "Brightness",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--dropShadow": [
+        "Drop Shadow",
+        "When idle",
+        "rgba(255, 255, 255, 1)"
+    ],
+    "--grayscale": [
+        "Grayscale",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--hueRotate": [
+        "Hue Rotate",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--invert": [
+        "Invert",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--opacity": [
+        "Opacity",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--saturate": [
+        "Saturate",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ],
+    "--sepia": [
+        "Sepia",
+        "When idle",
+        "rgba(0, 0, 0, 0.8)"
+    ]
+}
