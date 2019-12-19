@@ -126,10 +126,10 @@ function installApps() {
     const iconDivision = document.createElement("div");
     iconDivision.setAttribute("class", "workspaceAreaDivision");
     //Objectify PHP parameters
-    const parametersObject = {
-        functionString: "getFilePathsArray();",
-        directoryPath: ""
-    };
+    // const parametersObject = {
+    //     functionString: "getFilePathsArray();",
+    //     directoryPath: ""
+    // };
     //WARNING: DO NOT RELY ON AUTOMATIC APP INSTALLATION
     //Request appPathsArray
     // parseHttpDataRequest('FileSystem.php', parametersObject, "json", function (appPathsArray) {

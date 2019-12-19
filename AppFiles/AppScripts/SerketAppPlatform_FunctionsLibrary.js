@@ -149,39 +149,38 @@ function startDragCircularSlider(sliderThumb, customStartFunction, customMoveFun
         document.removeEventListener("mousemove", mouseMoveThumb);
         document.removeEventListener("mouseup", mouseUpThumb);
     }
-}
-//INFO: FUNCTION IS TO BE INVOKED INSIDE startDragCircularSlider
-//Rotates a sliderThumbContainer along with the mouse
-function rotateThumbContainer(eventDetails, sliderThumb, sliderThumbContainerCenterX, sliderThumbContainerCenterY) {
-    //Get mousePositions
-    const mousePositionY = eventDetails.clientY;
-    const mousePositionX = eventDetails.clientX;
-    //Calculate lengths of the adjacentSide (distanceDifferenceY) and the oppositeSide (distanceDifferenceX) relative to sliderCenter;
-    const distanceDifferenceY = mousePositionY - sliderThumbContainerCenterY;
-    const distanceDifferenceX = sliderThumbContainerCenterX - mousePositionX;
-    //Calculate theta(acute angle) after calculating tanTheta(absoluteValue)
-    const tanTheta = Math.abs(distanceDifferenceX / distanceDifferenceY);
-    let theta = Math.atan(tanTheta) * (180 / Math.PI);
-    //Adjust theta considering circular sides
-    if (distanceDifferenceX > 0 && distanceDifferenceY > 0) {
-        theta = theta;
-    } else if (distanceDifferenceX > 0 && distanceDifferenceY < 0) {
-        theta = 180 - theta;
-    } else if (distanceDifferenceX < 0 && distanceDifferenceY < 0) {
-        theta = 180 + theta;
-    } else if (distanceDifferenceX < 0 && distanceDifferenceY > 0) {
-        theta = 360 - theta;
-    } else if (distanceDifferenceX > 0 && distanceDifferenceY == 0) {
-        theta = 90;
-    } else if (distanceDifferenceX < 0 && distanceDifferenceY == 0) {
-        theta = 270;
-    } else if (distanceDifferenceX == 0 && distanceDifferenceY > 0) {
-        theta = 360;
-    } else if (distanceDifferenceX == 0 && distanceDifferenceY < 0) {
-        theta = 180;
+    //Rotates a sliderThumbContainer along with the mouse
+    function rotateThumbContainer(eventDetails) {
+        //Get mousePositions
+        const mousePositionY = eventDetails.clientY;
+        const mousePositionX = eventDetails.clientX;
+        //Calculate lengths of the adjacentSide (distanceDifferenceY) and the oppositeSide (distanceDifferenceX) relative to sliderCenter;
+        const distanceDifferenceY = mousePositionY - sliderThumbContainerCenterY;
+        const distanceDifferenceX = sliderThumbContainerCenterX - mousePositionX;
+        //Calculate theta(acute angle) after calculating tanTheta(absoluteValue)
+        const tanTheta = Math.abs(distanceDifferenceX / distanceDifferenceY);
+        let theta = Math.atan(tanTheta) * (180 / Math.PI);
+        //Adjust theta considering circular sides
+        if (distanceDifferenceX > 0 && distanceDifferenceY > 0) {
+            theta = theta;
+        } else if (distanceDifferenceX > 0 && distanceDifferenceY < 0) {
+            theta = 180 - theta;
+        } else if (distanceDifferenceX < 0 && distanceDifferenceY < 0) {
+            theta = 180 + theta;
+        } else if (distanceDifferenceX < 0 && distanceDifferenceY > 0) {
+            theta = 360 - theta;
+        } else if (distanceDifferenceX > 0 && distanceDifferenceY === 0) {
+            theta = 90;
+        } else if (distanceDifferenceX < 0 && distanceDifferenceY === 0) {
+            theta = 270;
+        } else if (distanceDifferenceX === 0 && distanceDifferenceY > 0) {
+            theta = 360;
+        } else if (distanceDifferenceX === 0 && distanceDifferenceY < 0) {
+            theta = 180;
+        }
+        //Rotate sliderThumbContainer according to theta
+        sliderThumb.parentElement.style.transform = "rotate(" + theta + "deg)";
     }
-    //Rotate sliderThumbContainer according to theta
-    sliderThumb.parentElement.style.transform = "rotate(" + theta + "deg)";
 }
 //Returns the value currently represented by a circularSliderThumb
 function getCircularSliderValue(sliderThumbContainer, rangeUpperLimit) {

@@ -1,15 +1,23 @@
 const http = require("http");
 const fs = require("fs");
+const fileSystem = require("./FileSystem.js");
 
-http.createServer(function(request, response) {
-    let fileExtension = request.url.slice(request.url.lastIndexOf("."));
-    if (fileExtension.startsWith(".")) {
-        fs.readFile(request.url.replace("/", ""), function(error, content) {
-            response.write(content);
-            response.end();
+const scorpiusServer = http.createServer(function (request, response) {
+    const fileName = request.url.slice(request.url.lastIndexOf("/"));
+    // let fileExtension = request.url.slice(request.url.lastIndexOf("."));
+    if (fileName === "/FileSystem.js") {
+        console.log("FileSystem request detected");
+    } else {
+        fs.readFile(request.url.replace("/", ""), function (error, content) {
+            if (error) {
+                console.log(error);
+            } else {
+                response.write(content);
+                response.end();
+            }
         });
     }
+});
 
-}).listen(80);
-
+scorpiusServer.listen(80);
 console.log("Server is online at 'localhost:80'");

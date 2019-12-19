@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title id="title">Levenshtein Autocorrect</title>
+    <meta charset="UTF-8">
+
+    <script>
+        //@ts-check
+        let wordsList;
+        function initialize() {
+            //Initialize words array
+            window.fetch("Words.json").then(function (response) {
+                return response.text();
+            }).then(function (response) {
+                wordsList = JSON.parse(response);
+                document.getElementById("wordsList").innerHTML = wordsList.toString();
+            });
+        }
+
+        function calculateMinEditDistance(columnString = "", rowString = "") {
+            //Convert all the strings into a matching case (in this case, lowercase)
+            columnString = columnString.toLowerCase();
+            rowString = rowString.toLowerCase();
+
+            //Generate Dynamic Programming table
+            const dpTable = [];
+            for (let i = 0; i < rowString.length + 1; i++) {
+                dpTable.push(new Array(columnString.length + 1));
+            }
+
+            //Fill-up edit distances compared with the "" (empty string)
+            //Fill the first column (represents number of insertions)
+            for (let i = 0; i < dpTable.length; i++) {
+                dpTable[i][0] = i;
+            }
+            //Fill the first row (represents number of deletions)
+            for (let i = 0; i < dpTable[0].length; i++) {
+                dpTable[0][i] = i;
+            }
+
+            for (let i = 1; i <= columnString.length; i++) {
+                for (let j = 1; j <= rowString.length; j++) {
+                    //Check if the last characters of both the column and row substrings matches
+                    //columnString[i-1] = last character of the column substring for the current iteration
+                    //rowString[j-1] = last character of the row substring for the current iteration
+                    if (columnString[i - 1] === rowString[j - 1]) {
+                        //If matches, no edits are required. New min edit distance = previous min edit distance
+                        dpTable[j][i] = dpTable[j - 1][i - 1];
+                    } else {
+                        //If doesn't match, one or more edits are required. New min edit distance = (previous min edit distance) + (required number of edits)
+                        //Required number of edits is always +1.
+                        //Therefore, New min edit distance = (previous min edit distance) + 1
+                        dpTable[j][i] = Math.min(dpTable[j - 1][i - 1], dpTable[j][i - 1], dpTable[j - 1][i]) + 1;
+                    }
+                }
+            }
+
+            //Minimum edit distance is the lower right value of the dpTable
+            return dpTable[rowString.length][columnString.length];
+        }
+
+        function getSuggestions(word = "") {
+            let minimumEditDistance = 1000;
+            const suggestions = [];
+            //Iterate through all the words in the wordsList
+            for (var i = 0; i < wordsList.length; i++) {
+                const currentEditDistance = calculateMinEditDistance(wordsList[i], word);
+                if (currentEditDistance === minimumEditDistance) {
+                    suggestions.push(wordsList[i]);
+                } else if (currentEditDistance < minimumEditDistance) {
+                    minimumEditDistance = currentEditDistance;
+                    suggestions.length = 0;
+                    suggestions.push(wordsList[i]);
+                }
+            }
+
+            // return suggestions;
+            document.getElementById("suggestions").innerHTML = suggestions.join("# ");
+        }
+    </script>
+</head>
+
+<body onload="initialize();">
+    <p>Ripped directly from Scorpius-Operating-System's Beta App Library</p>
+    <h1>Levenshtein Autocorrect</h1>
+    <input type="text" onkeyup="getSuggestions(this.value);" placeholder="Typing here.." />
+    <p id="suggestions"></p>
+    <hr />
+    <p id="wordsList" style="word-break: break-all;">
+        
+    </p>
+</body>
